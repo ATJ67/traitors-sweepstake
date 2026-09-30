@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Traitors Sweepstake</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗡️</text></svg>" />
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="hood" viewBox="0 0 24 24">
+      <path d="M12 1.5c-4.6 0-7.8 4.4-7.8 9.6V22.5h15.6V11.1c0-5.2-3.2-9.6-7.8-9.6Zm0 6.2c2.3 0 3.9 2.2 3.9 5 0 2.4-1.6 4.6-3.9 4.6s-3.9-2.2-3.9-4.6c0-2.8 1.6-5 3.9-5Z" fill="currentColor" fill-rule="evenodd"/>
+    </symbol>
+  </svg>
+
+  <main class="layout">
+    <section class="stage" id="stage" aria-label="The round table">
+      <img class="stage-img" src="images/table.webp" alt="" />
+      <div class="stage-vignette" aria-hidden="true"></div>
+      <div class="seats" id="seats"></div>
+    </section>
+
+    <aside class="side">
+      <div class="series"><b>Celebrity Series 2</b> <span>·</span> <b>Office Sweepstake</b></div>
+
+      <div class="countdown" id="countdown" aria-live="polite">
+        <div class="cd-label" id="cd-label">Next episode</div>
+        <div class="cd-clock" id="cd-clock">
+          <div class="unit"><span id="cd-d">00</span><small>Days</small></div>
+          <div class="unit"><span id="cd-h">00</span><small>Hrs</small></div>
+          <div class="unit"><span id="cd-m">00</span><small>Mins</small></div>
+          <div class="unit"><span id="cd-s">00</span><small>Secs</small></div>
+        </div>
+        <div class="cd-when" id="cd-when"></div>
+      </div>
+
+      <div class="stats">
+        <div><strong id="remaining">21</strong><span>At the table</span></div>
+        <div><strong id="fallen-count">0</strong><span>Fallen</span></div>
+      </div>
+
+      <div class="coffin">
+        <svg class="coffin-art" viewBox="0 0 400 860" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          <defs>
+            <linearGradient id="wood" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stop-color="#2a0f06"/>
+              <stop offset=".22" stop-color="#5a2410"/>
+              <stop offset=".5" stop-color="#76331a"/>
+              <stop offset=".78" stop-color="#5a2410"/>
+              <stop offset="1" stop-color="#2a0f06"/>
+            </linearGradient>
+            <linearGradient id="lid" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stop-color="#6a2c15"/>
+              <stop offset=".55" stop-color="#4a1d0c"/>
+              <stop offset="1" stop-color="#2e1107"/>
+            </linearGradient>
+            <linearGradient id="gold" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#f3dc9a"/>
+              <stop offset=".45" stop-color="#c9a24a"/>
+              <stop offset="1" stop-color="#7d5c1e"/>
+            </linearGradient>
+            <linearGradient id="sheen" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#fff" stop-opacity=".16"/>
+              <stop offset=".35" stop-color="#fff" stop-opacity="0"/>
+            </linearGradient>
+            <filter id="grain" x="0" y="0" width="100%" height="100%">
+              <feTurbulence type="fractalNoise" baseFrequency="0.006 0.16" numOctaves="3" seed="7" result="n"/>
+              <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.08  0 0 0 0 0.03  0 0 0 0 0.01  0 0 0 1.1 -0.45"/>
+              <feComposite in2="SourceGraphic" operator="in"/>
+            </filter>
+            <filter id="shadow" x="-20%" y="-10%" width="140%" height="130%">
+              <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity=".75"/>
+            </filter>
+          </defs>
+          <g filter="url(#shadow)">
+            <path d="M124 6 H276 L394 150 L326 854 H74 L6 150 Z" fill="url(#wood)" stroke="#1a0904" stroke-width="4" stroke-linejoin="round"/>
+          </g>
+          <path d="M124 6 H276 L394 150 L326 854 H74 L6 150 Z" fill="#000" filter="url(#grain)" opacity=".9"/>
+          <path d="M134 26 H266 L370 152 L308 834 H92 L30 152 Z" fill="url(#lid)" stroke="url(#gold)" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M134 26 H266 L370 152 L308 834 H92 L30 152 Z" fill="#000" filter="url(#grain)" opacity=".7"/>
+          <path d="M143 38 H257 L356 154 L297 822 H103 L44 154 Z" fill="none" stroke="#c9a24a" stroke-opacity=".35" stroke-width="1" stroke-linejoin="round"/>
+          <path d="M124 6 H276 L394 150 L326 854 H74 L6 150 Z" fill="url(#sheen)"/>
+          <g fill="url(#gold)">
+            <circle cx="140" cy="40" r="3.5"/><circle cx="260" cy="40" r="3.5"/>
+            <circle cx="46" cy="152" r="3.5"/><circle cx="354" cy="152" r="3.5"/>
+            <circle cx="104" cy="818" r="3.5"/><circle cx="296" cy="818" r="3.5"/>
+          </g>
+          <circle cx="200" cy="96" r="34" fill="#1a0c06" stroke="url(#gold)" stroke-width="3"/>
+          <circle cx="200" cy="96" r="27" fill="none" stroke="#c9a24a" stroke-opacity=".4"/>
+          <use href="#hood" x="182" y="77" width="36" height="36" color="#d9b866"/>
+        </svg>
+
+        <div class="coffin-body">
+          <h2>Rest in Peace</h2>
+          <ol class="coffin-list" id="coffin-list"></ol>
+          <p class="coffin-empty" id="coffin-empty">No one has left the castle… yet.</p>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <button class="manage-btn" id="manage-btn" title="Manage sweepstake (M)">Manage</button>
+
+  <!-- Admin panel -->
+  <dialog id="admin" class="admin">
+    <form method="dialog" class="admin-inner" id="admin-form">
+      <header class="admin-head">
+        <h2>Manage sweepstake</h2>
+        <button class="icon-btn" value="close" aria-label="Close">✕</button>
+      </header>
+
+      <div class="admin-grid">
+        <section class="admin-col">
+          <h3>Colleagues</h3>
+          <p class="hint">One name per line.</p>
+          <textarea id="colleagues-input" rows="12" placeholder="Sam&#10;Priya&#10;Jordan…"></textarea>
+          <button type="button" class="btn gold" id="draw-btn">Random draw</button>
+          <p class="hint">Shuffles the celebrities and deals them out evenly to the colleagues. Overwrites current assignments.</p>
+        </section>
+
+        <section class="admin-col wide">
+          <h3>Celebrities</h3>
+          <div class="admin-table-scroll">
+            <table class="admin-table">
+              <thead><tr><th>Celebrity</th><th>Drawn by</th><th>Status</th><th>Ep</th><th>Traitor</th></tr></thead>
+              <tbody id="admin-rows"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <footer class="admin-foot">
+        <p class="hint">Changes save in this browser. To update the hosted site for everyone, click <strong>Export data.js</strong> and replace the file in the project.</p>
+        <div class="admin-actions">
+          <button type="button" class="btn ghost" id="reset-btn">Reset to data.js</button>
+          <button type="button" class="btn ghost" id="export-btn">Export data.js</button>
+          <button type="button" class="btn gold" id="save-btn">Save</button>
+        </div>
+      </footer>
+    </form>
+  </dialog>
+
+  <script src="data.js?v=6"></script>
+  <script src="app.js?v=6"></script>
+</body>
+</html>
