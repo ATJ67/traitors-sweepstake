@@ -7,7 +7,6 @@
 
   const $ = (id) => document.getElementById(id);
   const clone = (o) => JSON.parse(JSON.stringify(o));
-  const isOut = (c) => c.status === "banished" || c.status === "murdered";
 
   // ── State ──────────────────────────────────────────────
   // Local edits (from the Manage panel) are kept in localStorage, but are
@@ -24,6 +23,12 @@
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ base: BASE_JSON, state })); } catch (e) {}
   }
   let state = loadState();
+  const T = window.TraitorsScoring;
+  let score = T.compute(state);              // everything below reads from this
+  const sc = (name) => score.contestants[name];
+  const OUT = ["murdered", "banished", "left"];
+  const isOut = (c) => OUT.includes(sc(c.name).status);
+  function recompute() { score = T.compute(state); }
 
   if (new URLSearchParams(location.search).has("projector")) document.body.classList.add("projector");
 
@@ -111,15 +116,23 @@
       nameEl.appendChild(el("span", "l", words.length > 1 ? words.slice(0, -1).join(" ") + " " : c.name));
       if (words.length > 1) nameEl.appendChild(el("span", "l", words[words.length - 1]));
       txt.appendChild(nameEl);
+      const s = sc(c.name);
       if (out) {
-        let fate = c.status === "murdered" ? "Murdered" : "Banished";
-        if (c.status === "banished") fate += c.traitor ? " · Traitor" : " · Faithful";
-        txt.appendChild(el("div", "fate fit " + (c.traitor ? "traitor" : c.status), fate));
+        let fate = { murdered: "Murdered", banished: "Banished", left: "Left the game" }[s.status];
+        if (s.status === "banished") fate += " · " + s.roleAtExit;
+        const cls = s.status === "banished" && s.roleAtExit === "Traitor" ? "traitor" : s.status;
+        txt.appendChild(el("div", "fate fit " + cls, fate));
+      } else if (s.status === "winner") {
+        seat.classList.add("won");
+        txt.appendChild(el("div", "fate fit winner", "Winner · " + (c.colleague || "")));
       } else {
         txt.appendChild(el("div", c.colleague ? "who fit" : "who fit none", c.colleague || "Unassigned"));
       }
       seat.appendChild(txt);
-      seat.title = `${c.name} — ${c.role}${c.colleague ? " · drawn by " + c.colleague : ""}`;
+      seat.title = `${c.name} — ${s.total} pts${c.colleague ? " · drawn by " + c.colleague : ""} (click for points history)`;
+      seat.tabIndex = 0;
+      seat.onclick = () => openHistory(c.name);
+      seat.onkeydown = (e) => { if (e.key === "Enter") openHistory(c.name); };
       seatsEl.appendChild(seat);
     });
 
@@ -156,22 +169,22 @@
   function renderCoffin() {
     const list = $("coffin-list");
     list.innerHTML = "";
-    const fallen = state.celebs
-      .map((c, i) => ({ c, i }))
-      .filter(({ c }) => isOut(c))
-      .sort((a, b) => (a.c.episode || 99) - (b.c.episode || 99) || (a.c.outOrder || a.i) - (b.c.outOrder || b.i))
-      .map(({ c }) => c);
+    const byName = Object.fromEntries(state.celebs.map((c) => [c.name, c]));
+    const fallen = score.names.map(sc).filter((s) => OUT.includes(s.status))
+      .sort((a, b) => a.position - b.position);
 
-    fallen.forEach((c) => {
-      const li = el("li", c.traitor ? "traitor" : c.status);
+    fallen.forEach((s) => {
+      const c = byName[s.name];
+      const traitor = s.roleAtExit === "Traitor";
+      const li = el("li", traitor ? "traitor" : s.status);
       li.appendChild(el("div", "rip-name", c.name));
       li.appendChild(el("div", c.colleague ? "rip-who" : "rip-who none", c.colleague || "Unassigned"));
       const meta = el("div", "rip-meta");
-      if (c.episode) meta.appendChild(el("span", "tag", "Ep " + c.episode));
-      meta.appendChild(el("span", "tag " + c.status, c.status === "murdered" ? "Murdered" : "Banished"));
-      if (c.traitor) meta.appendChild(el("span", "tag traitor", "Traitor"));
-      else if (c.status === "banished") meta.appendChild(el("span", "tag faithful", "Faithful"));
+      if (s.exitEp) meta.appendChild(el("span", "tag", "Ep " + s.exitEp));
+      meta.appendChild(el("span", "tag " + s.status, { murdered: "Murdered", banished: "Banished", left: "Left" }[s.status]));
+      if (s.status === "banished") meta.appendChild(el("span", "tag " + (traitor ? "traitor" : "faithful"), s.roleAtExit));
       li.appendChild(meta);
+      li.onclick = () => openHistory(c.name);
       list.appendChild(li);
     });
 
@@ -185,15 +198,18 @@
   // switch to a denser layout, and only as a last resort slowly auto-scroll.
   function fitCoffin() {
     const list = $("coffin-list");
-    const fits = () => list.scrollHeight <= list.clientHeight + 1;
+    const fits = () => list.scrollHeight <= list.clientHeight + 1 && list.scrollWidth <= list.clientWidth + 1;
     list.classList.remove("compact", "scrolling");
     for (const compact of [false, true]) {
       list.classList.toggle("compact", compact);
-      for (let rs = 1; rs >= (compact ? 0.7 : 0.8) - 1e-9; rs -= 0.02) {
+      for (let rs = 1; rs >= (compact ? 0.62 : 0.8) - 1e-9; rs -= 0.02) {
         list.style.setProperty("--rs", rs.toFixed(2));
         if (fits()) return;
       }
     }
+    // last resort: the wrapping layout (never runs out sideways), slowly scrolling
+    list.classList.remove("compact");
+    list.style.setProperty("--rs", "0.8");
     list.classList.add("scrolling");
   }
   new ResizeObserver(() => fitCoffin()).observe(document.querySelector(".coffin-body"));
@@ -265,6 +281,170 @@
   tick();
   setInterval(tick, 1000);
 
+  // ── Leaderboard ────────────────────────────────────────
+  const GROUP_LABEL = { placement: "Placement", faithful: "Faithful", traitor: "Traitor", winner: "Winner" };
+  const fmtPts = (n) => (n ? String(n) : "–");
+
+  function roleLabel(s) {
+    if (s.originalRole === "Faithful" && s.role === "Traitor") return "Traitor (recruited)";
+    return s.role;
+  }
+  function statusLabel(s) {
+    if (s.status === "active") return "Active";
+    if (s.status === "winner") return "Winner";
+    return { murdered: "Murdered", banished: "Banished", left: "Left" }[s.status] + (s.exitEp ? " · Ep " + s.exitEp : "");
+  }
+  function ranked(rows, key) {
+    rows.sort((a, b) => key(b) - key(a) || a.name.localeCompare(b.name));
+    let rank = 0, prev = null;
+    rows.forEach((r, i) => { const k = key(r); if (k !== prev) { rank = i + 1; prev = k; } r.rank = rank; });
+    return rows;
+  }
+
+  function renderBoard() {
+    const byName = Object.fromEntries(state.celebs.map((c) => [c.name, c]));
+    const rows = ranked(score.names.map((n) => ({ ...sc(n), colleague: byName[n].colleague })), (r) => r.total);
+    const tbody = $("lb-rows");
+    tbody.innerHTML = "";
+    rows.forEach((r) => {
+      const tr = el("tr", "st-" + r.status);
+      tr.tabIndex = 0;
+      tr.onclick = () => openHistory(r.name);
+      tr.onkeydown = (e) => { if (e.key === "Enter") openHistory(r.name); };
+      tr.appendChild(el("td", "rk", r.rank));
+      const who = el("td", "who-cell");
+      who.appendChild(el("div", "lb-name", r.name));
+      who.appendChild(el("div", "lb-col", r.colleague || "Unassigned"));
+      tr.appendChild(who);
+      const rs = el("td", "rs");
+      rs.appendChild(el("div", "role " + (r.role === "Traitor" ? "is-traitor" : "is-faithful"), roleLabel(r)));
+      rs.appendChild(el("div", "status", statusLabel(r)));
+      tr.appendChild(rs);
+      const pl = el("td", "num g-placement" + (r.provisional ? " prov" : ""), r.placement);
+      if (r.provisional) pl.title = "Still in: the minimum placement points they're now guaranteed";
+      tr.appendChild(pl);
+      tr.appendChild(el("td", "num g-faithful", fmtPts(r.groups.faithful)));
+      tr.appendChild(el("td", "num g-traitor", fmtPts(r.groups.traitor)));
+      tr.appendChild(el("td", "num g-winner", fmtPts(r.groups.winner)));
+      tr.appendChild(el("td", "num bonus", r.bonus));
+      tr.appendChild(el("td", "num total", r.total));
+      tbody.appendChild(tr);
+    });
+
+    // Sweepstake standings: each colleague's celebrities added together
+    const players = {};
+    state.celebs.forEach((c) => {
+      if (!c.colleague) return;
+      const p = (players[c.colleague] = players[c.colleague] || { name: c.colleague, total: 0, celebs: [] });
+      p.total += sc(c.name).total;
+      p.celebs.push(sc(c.name));
+    });
+    const list = $("players");
+    list.innerHTML = "";
+    ranked(Object.values(players), (p) => p.total).forEach((p) => {
+      const li = el("li");
+      li.appendChild(el("span", "p-rank", p.rank));
+      const mid = el("div", "p-mid");
+      mid.appendChild(el("div", "p-name", p.name));
+      const cs = el("div", "p-celebs");
+      p.celebs.forEach((s) => {
+        const chip = el("span", "p-celeb st-" + s.status, s.name + " " + s.total);
+        chip.onclick = () => openHistory(s.name);
+        cs.appendChild(chip);
+      });
+      mid.appendChild(cs);
+      li.appendChild(mid);
+      li.appendChild(el("span", "p-total", p.total));
+      list.appendChild(li);
+    });
+    fitBoard();
+  }
+
+  // Keep the leaderboard on one screen: shrink rows until it fits.
+  function fitBoard() {
+    const board = $("board");
+    if (board.hidden) return;
+    board.style.setProperty("--bs", 1);
+    for (let k = 1; k >= 0.6; k -= 0.03) {
+      board.style.setProperty("--bs", k.toFixed(2));
+      const table = board.querySelector(".lb"), main = board.querySelector(".board-main");
+      if (board.scrollHeight <= board.clientHeight + 1 && table.scrollWidth <= main.clientWidth + 1) break;
+    }
+  }
+  new ResizeObserver(fitBoard).observe($("board"));
+
+  // ── View switch (Round Table / Leaderboard) ────────────
+  const params = new URLSearchParams(location.search);
+  function setView(v) {
+    $("stage").hidden = v !== "table";
+    $("board").hidden = v !== "board";
+    document.querySelectorAll(".views button").forEach((b) => b.classList.toggle("on", b.dataset.view === v));
+    if (v === "board") { renderBoard(); }
+    else fitText();
+  }
+  document.querySelectorAll(".views button").forEach((b) => (b.onclick = () => setView(b.dataset.view)));
+  // ?rotate=30 flips between the two views every 30s (for the projector)
+  const rotate = Number(params.get("rotate"));
+  if (rotate > 0) setInterval(() => setView($("board").hidden ? "board" : "table"), rotate * 1000);
+
+  // ── Points history ─────────────────────────────────────
+  const histDlg = $("hist");
+  function openHistory(name) {
+    const s = sc(name);
+    const c = state.celebs.find((x) => x.name === name);
+    const body = $("hist-body");
+    body.innerHTML = "";
+    $("hist-name").textContent = name;
+    $("hist-sub").textContent = [c.colleague ? "Drawn by " + c.colleague : "Unassigned", roleLabel(s) + (s.recruitedEp ? " from Ep " + s.recruitedEp : ""), statusLabel(s)].join(" · ");
+
+    const sum = el("div", "hist-sum");
+    T.GROUPS.forEach((g) => {
+      const box = el("div", "hs g-" + g);
+      box.appendChild(el("strong", null, s.groups[g] + (g === "placement" && s.provisional ? "*" : "")));
+      box.appendChild(el("span", null, GROUP_LABEL[g]));
+      sum.appendChild(box);
+    });
+    const tot = el("div", "hs total");
+    tot.appendChild(el("strong", null, s.total));
+    tot.appendChild(el("span", null, "Total"));
+    sum.appendChild(tot);
+    body.appendChild(sum);
+
+    // every category from the brief, even when zero
+    const cats = el("dl", "hist-cats");
+    Object.entries(T.CATS).forEach(([k, def]) => {
+      if (k === "placement") return;
+      const label = def.label + (k === "zeroVoteF" ? " (Faithful)" : k === "zeroVoteT" ? " (Traitor)" : "");
+      const row = el("div", "g-" + def.group + (s.cats[k] ? "" : " zero"));
+      row.appendChild(el("dt", null, label));
+      row.appendChild(el("dd", null, s.cats[k] || 0));
+      cats.appendChild(row);
+    });
+    body.appendChild(cats);
+
+    const hist = T.history(s);
+    if (!hist.length) body.appendChild(el("p", "hint", "No points scored yet."));
+    hist.forEach((h) => {
+      const sec = el("section", "hist-ep");
+      sec.appendChild(el("h4", null, h.ep ? "Episode " + h.ep : "Series"));
+      const ul = el("ul");
+      h.items.forEach((it) => {
+        const li = el("li", "g-" + T.CATS[it.cat].group);
+        li.appendChild(el("span", null, T.CATS[it.cat].label + (it.note ? " — " + it.note : "")));
+        li.appendChild(el("b", null, "+" + it.pts));
+        ul.appendChild(li);
+      });
+      const tl = el("li", "ep-total");
+      tl.appendChild(el("span", null, "Episode points"));
+      tl.appendChild(el("b", null, "+" + h.pts));
+      ul.appendChild(tl);
+      sec.appendChild(ul);
+      body.appendChild(sec);
+    });
+    if (s.provisional) body.appendChild(el("p", "hint", "* Still in the game: placement shows the minimum they're now guaranteed, and locks in when they leave."));
+    histDlg.showModal();
+  }
+
   // ── Manage panel ───────────────────────────────────────
   const dlg = $("admin");
   let draft = null;
@@ -273,60 +453,169 @@
     return $("colleagues-input").value.split("\n").map((s) => s.trim()).filter(Boolean);
   }
   function wrapTd(child) { const td = el("td"); td.appendChild(child); return td; }
+  function select(options, value, onchange, cls) {
+    const sel = el("select", cls);
+    options.forEach(([v, t]) => {
+      const o = el("option", null, t);
+      o.value = v;
+      if (v === (value || "")) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.onchange = () => onchange(sel.value);
+    return sel;
+  }
 
   function renderAdminRows() {
     const names = draftColleagues();
     const tbody = $("admin-rows");
     tbody.innerHTML = "";
+    const traitors = new Set(draft.originalTraitors || []);
     draft.celebs.forEach((c) => {
       const tr = el("tr");
-      if (isOut(c)) tr.className = "out";
       tr.appendChild(el("td", null, c.name));
-
-      const sel = el("select");
       const opts = [""].concat(names);
       if (c.colleague && !names.includes(c.colleague)) opts.push(c.colleague);
-      opts.forEach((n) => {
-        const o = el("option", null, n || "— Unassigned —");
-        o.value = n;
-        if (n === c.colleague) o.selected = true;
-        sel.appendChild(o);
-      });
-      sel.onchange = () => { c.colleague = sel.value; };
-      tr.appendChild(wrapTd(sel));
-
-      const st = el("select");
-      [["in", "At the table"], ["banished", "Banished"], ["murdered", "Murdered"]].forEach(([v, t]) => {
-        const o = el("option", null, t); o.value = v; if (v === c.status) o.selected = true; st.appendChild(o);
-      });
-      const ep = el("input"); ep.type = "number"; ep.min = 1; ep.max = 10; ep.value = c.episode || "";
-      st.onchange = () => {
-        const wasOut = isOut(c);
-        c.status = st.value;
-        if (isOut(c) && !wasOut) {
-          c.episode = c.episode || Math.max(1, airedCount());
-          c.outOrder = Date.now();
-          ep.value = c.episode;
-        }
-        if (!isOut(c)) { c.episode = null; ep.value = ""; delete c.outOrder; }
-        tr.className = isOut(c) ? "out" : "";
-      };
-      ep.onchange = () => { c.episode = ep.value ? Number(ep.value) : null; };
-      tr.appendChild(wrapTd(st));
-      tr.appendChild(wrapTd(ep));
-
-      const tBox = el("input"); tBox.type = "checkbox"; tBox.checked = !!c.traitor;
-      tBox.onchange = () => { c.traitor = tBox.checked; };
-      tr.appendChild(wrapTd(tBox));
-
+      tr.appendChild(wrapTd(select(opts.map((n) => [n, n || "— Unassigned —"]), c.colleague, (v) => { c.colleague = v; })));
+      tr.appendChild(wrapTd(select([["Faithful", "Faithful"], ["Traitor", "Traitor"]], traitors.has(c.name) ? "Traitor" : "Faithful", (v) => {
+        const set = new Set(draft.originalTraitors || []);
+        v === "Traitor" ? set.add(c.name) : set.delete(c.name);
+        draft.originalTraitors = draft.celebs.map((x) => x.name).filter((n) => set.has(n));
+        renderLog();
+      })));
       tbody.appendChild(tr);
     });
   }
 
+  // Game log editor: every event is edited in place, and the scoring is
+  // re-run after each change so the dropdowns only offer who's still in.
+  const EVENT_LABEL = { murder: "Murder", recruit: "Recruitment", roundtable: "Round Table", exit: "Left the game", final: "The Final" };
+  function renderLog() {
+    const sim = T.compute(draft);
+    const list = $("log-list");
+    list.innerHTML = "";
+    if (!draft.events.length) list.appendChild(el("li", "hint", "No events yet. Add what happened in each episode, in order."));
+    draft.events.forEach((ev, i) => {
+      const step = sim.steps[i];
+      const tag = (n) => n + (step.roles[n] === "Traitor" ? "  (T)" : "");
+      const activeOpts = step.active.map((n) => [n, tag(n)]);
+      const li = el("li", "ev ev-" + ev.type);
+
+      const head = el("div", "ev-head");
+      const ep = el("input"); ep.type = "number"; ep.min = 1; ep.max = 10; ep.value = ev.ep || "";
+      ep.onchange = () => { ev.ep = Number(ep.value) || null; renderLog(); };
+      const epl = el("label", "ev-ep", "Ep ");
+      epl.appendChild(ep);
+      head.appendChild(epl);
+      head.appendChild(el("strong", null, EVENT_LABEL[ev.type]));
+      const tools = el("span", "ev-tools");
+      [["↑", -1], ["↓", 1]].forEach(([t, d]) => {
+        const b = el("button", "icon-btn", t); b.type = "button"; b.title = d < 0 ? "Move up" : "Move down";
+        b.onclick = () => { const j = i + d; if (j < 0 || j >= draft.events.length) return; [draft.events[i], draft.events[j]] = [draft.events[j], draft.events[i]]; renderLog(); };
+        tools.appendChild(b);
+      });
+      const del = el("button", "icon-btn", "✕"); del.type = "button"; del.title = "Delete event";
+      del.onclick = () => { if (confirm("Delete this " + EVENT_LABEL[ev.type] + " event?")) { draft.events.splice(i, 1); renderLog(); } };
+      tools.appendChild(del);
+      head.appendChild(tools);
+      li.appendChild(head);
+
+      const body = el("div", "ev-body");
+      const field = (label, control) => { const l = el("label", "ev-field", label); l.appendChild(control); body.appendChild(l); };
+
+      if (ev.type === "murder") {
+        field("Victim", select([["", "— No murder (shield, recruitment, twist) —"]].concat(activeOpts), ev.victim, (v) => { ev.victim = v || null; renderLog(); }));
+      } else if (ev.type === "recruit") {
+        field("Recruited", select([["", "— choose —"]].concat(step.active.filter((n) => step.roles[n] === "Faithful").map((n) => [n, n])), ev.who, (v) => { ev.who = v; renderLog(); }));
+        field("Outcome", select([["yes", "Accepted"], ["no", "Declined"]], ev.accepted === false ? "no" : "yes", (v) => { ev.accepted = v === "yes"; renderLog(); }));
+      } else if (ev.type === "exit") {
+        field("Who left", select([["", "— choose —"]].concat(activeOpts), ev.who, (v) => { ev.who = v; renderLog(); }));
+      } else if (ev.type === "final") {
+        const box = el("div", "ev-winners");
+        step.active.forEach((n) => {
+          const l = el("label", "chk");
+          const cb = el("input"); cb.type = "checkbox"; cb.checked = (ev.winners || []).includes(n);
+          cb.onchange = () => { const w = new Set(ev.winners || []); cb.checked ? w.add(n) : w.delete(n); ev.winners = step.active.filter((x) => w.has(x)); renderLog(); };
+          l.appendChild(cb); l.append(" " + tag(n));
+          box.appendChild(l);
+        });
+        body.appendChild(el("div", "hint", "Tick the winner(s). Anyone else still in should be banished in a Round Table above this."));
+        body.appendChild(box);
+      } else if (ev.type === "roundtable") {
+        ev.votes = ev.votes || {}; ev.revotes = ev.revotes || []; ev.absent = ev.absent || [];
+        const present = step.active.filter((n) => !ev.absent.includes(n));
+        const targetOpts = [["", "—"]].concat(present.map((n) => [n, tag(n)]));
+        const tbl = el("table", "vote-table");
+        const hr = el("tr");
+        ["Player", "Present", "Vote"].concat(ev.revotes.map((_, k) => "Re-vote " + (k + 1))).forEach((h) => hr.appendChild(el("th", null, h)));
+        tbl.appendChild(hr);
+        step.active.forEach((n) => {
+          const tr = el("tr");
+          const isIn = !ev.absent.includes(n);
+          if (!isIn) tr.className = "absent";
+          tr.appendChild(el("td", null, tag(n)));
+          const cb = el("input"); cb.type = "checkbox"; cb.checked = isIn;
+          cb.onchange = () => {
+            ev.absent = cb.checked ? ev.absent.filter((x) => x !== n) : ev.absent.concat(n);
+            renderLog();
+          };
+          tr.appendChild(wrapTd(cb));
+          [ev.votes].concat(ev.revotes).forEach((round) => {
+            tr.appendChild(wrapTd(isIn ? select(targetOpts.filter(([v]) => v !== n), round[n], (v) => { if (v) round[n] = v; else delete round[n]; renderLog(); }) : el("span", "hint", "absent")));
+          });
+          tbl.appendChild(tr);
+        });
+        body.appendChild(tbl);
+
+        const tools2 = el("div", "ev-row");
+        const fillSel = select(targetOpts, "", () => {});
+        const fill = el("button", "btn ghost sm", "Fill blank votes"); fill.type = "button";
+        fill.onclick = () => { const t = fillSel.value; if (!t) return; present.forEach((n) => { if (n !== t && !ev.votes[n]) ev.votes[n] = t; }); renderLog(); };
+        tools2.append("Fill blank first-round votes with ", fillSel, fill);
+        const addRv = el("button", "btn ghost sm", "+ Re-vote"); addRv.type = "button";
+        addRv.onclick = () => { ev.revotes.push({}); renderLog(); };
+        tools2.appendChild(addRv);
+        if (ev.revotes.length) {
+          const rmRv = el("button", "btn ghost sm", "− Re-vote"); rmRv.type = "button";
+          rmRv.onclick = () => { ev.revotes.pop(); renderLog(); };
+          tools2.appendChild(rmRv);
+        }
+        body.appendChild(tools2);
+        field("Banished", select([["", "— Nobody —"]].concat(step.active.map((n) => [n, tag(n)])), ev.banished, (v) => { ev.banished = v || null; renderLog(); }));
+      }
+      li.appendChild(body);
+      list.appendChild(li);
+    });
+  }
+
+  function nextEp() {
+    const last = draft.events[draft.events.length - 1];
+    return Math.max(last ? last.ep || 1 : 1, airedCount());
+  }
+  document.querySelectorAll("[data-add]").forEach((b) => {
+    b.onclick = () => {
+      const type = b.dataset.add;
+      const ev = { ep: nextEp(), type };
+      if (type === "roundtable") Object.assign(ev, { votes: {}, revotes: [], absent: [], banished: null });
+      if (type === "recruit") ev.accepted = true;
+      if (type === "final") ev.winners = [];
+      draft.events.push(ev);
+      renderLog();
+      $("log-list").lastElementChild.scrollIntoView({ block: "nearest" });
+    };
+  });
+
+  function setTab(t) {
+    document.querySelectorAll(".admin-tabs button").forEach((b) => b.classList.toggle("on", b.dataset.tab === t));
+    document.querySelectorAll(".admin-pane").forEach((p) => (p.hidden = p.dataset.pane !== t));
+  }
+  document.querySelectorAll(".admin-tabs button").forEach((b) => (b.onclick = () => setTab(b.dataset.tab)));
+
   function openAdmin() {
     draft = clone(state);
+    draft.events = draft.events || [];
     $("colleagues-input").value = draft.colleagues.join("\n");
     renderAdminRows();
+    renderLog();
     dlg.showModal();
   }
 
@@ -340,7 +629,10 @@
 
   $("manage-btn").onclick = openAdmin;
   document.addEventListener("keydown", (e) => {
-    if (e.key.toLowerCase() === "m" && !dlg.open && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) openAdmin();
+    if (/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || dlg.open || histDlg.open) return;
+    const k = e.key.toLowerCase();
+    if (k === "m") openAdmin();
+    if (k === "l") setView($("board").hidden ? "board" : "table");
   });
   $("colleagues-input").addEventListener("input", renderAdminRows);
 
@@ -353,12 +645,18 @@
     renderAdminRows();
   };
 
+  function refreshAll() {
+    recompute();
+    renderSeats();
+    renderCoffin();
+    if (!$("board").hidden) renderBoard();
+  }
+
   $("save-btn").onclick = () => {
     draft.colleagues = draftColleagues();
     state = draft;
     persist();
-    renderSeats();
-    renderCoffin();
+    refreshAll();
     dlg.close();
   };
 
@@ -366,17 +664,16 @@
     if (!confirm("Discard changes made in this browser and go back to data.js?")) return;
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     state = clone(BASE);
-    renderSeats();
-    renderCoffin();
+    refreshAll();
     dlg.close();
   };
 
   $("export-btn").onclick = () => {
     const data = clone(draft);
     data.colleagues = draftColleagues();
-    const src =
+      const src =
       "// Sweepstake data — exported " + new Date().toLocaleString("en-GB") + "\n" +
-      "// status: \"in\" | \"banished\" | \"murdered\" · episode: when they left · traitor: revealed as Traitor\n\n" +
+      "// Points are calculated from `events` by scoring.js — see the README for the event format.\n\n" +
       "window.SWEEPSTAKE = " + JSON.stringify(data, null, 2) + ";\n";
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([src], { type: "text/javascript" }));
@@ -388,4 +685,5 @@
   // ── Go ─────────────────────────────────────────────────
   renderSeats();
   renderCoffin();
+  setView(params.get("view") === "board" ? "board" : "table");
 })();

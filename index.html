@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=6" />
+  <link rel="stylesheet" href="styles.css?v=10" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗡️</text></svg>" />
 </head>
 <body>
@@ -24,8 +24,43 @@
       <div class="seats" id="seats"></div>
     </section>
 
+    <section class="board" id="board" hidden aria-label="Leaderboard">
+      <div class="board-main">
+        <header class="board-head">
+          <h2>Leaderboard</h2>
+          <div class="legend">
+            <span class="g-placement">Placement <small>surviving</small></span>
+            <span class="g-faithful">Faithful <small>deduction</small></span>
+            <span class="g-traitor">Traitor <small>deception</small></span>
+            <span class="g-winner">Winner <small>+5 bonus</small></span>
+          </div>
+        </header>
+        <table class="lb">
+          <thead>
+            <tr>
+              <th class="rk">#</th><th>Contestant</th><th>Role · Status</th>
+              <th class="num g-placement">Placement</th><th class="num g-faithful">Faithful</th>
+              <th class="num g-traitor">Traitor</th><th class="num g-winner">Winner</th>
+              <th class="num">Bonus</th><th class="num total">Total</th>
+            </tr>
+          </thead>
+          <tbody id="lb-rows"></tbody>
+        </table>
+        <p class="board-note">Placement for anyone still in is provisional (in italics): the minimum they're now guaranteed. Click a contestant for their points history.</p>
+      </div>
+      <div class="board-side">
+        <h3>Sweepstake standings</h3>
+        <ol class="players" id="players"></ol>
+      </div>
+    </section>
+
     <aside class="side">
       <div class="series"><b>Celebrity Series 2</b> <span>·</span> <b>Office Sweepstake</b></div>
+
+      <div class="views" role="tablist" aria-label="View">
+        <button type="button" data-view="table" class="on" title="Round Table (L)">Round Table</button>
+        <button type="button" data-view="board" title="Leaderboard (L)">Leaderboard</button>
+      </div>
 
       <div class="countdown" id="countdown" aria-live="polite">
         <div class="cd-label" id="cd-label">Next episode</div>
@@ -113,7 +148,25 @@
         <button class="icon-btn" value="close" aria-label="Close">✕</button>
       </header>
 
-      <div class="admin-grid">
+      <nav class="admin-tabs">
+        <button type="button" data-tab="log" class="on">Game log</button>
+        <button type="button" data-tab="draw">Draw &amp; starting roles</button>
+      </nav>
+
+      <div class="admin-pane" data-pane="log">
+        <p class="hint">Add what happened in each episode, <strong>in the order it happened</strong>. All points, statuses and the leaderboard are worked out from this log. Names marked (T) are Traitors at that point.</p>
+        <div class="log-add">
+          <span>Add:</span>
+          <button type="button" class="btn ghost sm" data-add="murder">Murder</button>
+          <button type="button" class="btn ghost sm" data-add="roundtable">Round Table</button>
+          <button type="button" class="btn ghost sm" data-add="recruit">Recruitment</button>
+          <button type="button" class="btn ghost sm" data-add="exit">Left the game</button>
+          <button type="button" class="btn ghost sm" data-add="final">The Final</button>
+        </div>
+        <ol class="log-list" id="log-list"></ol>
+      </div>
+
+      <div class="admin-grid admin-pane" data-pane="draw" hidden>
         <section class="admin-col">
           <h3>Colleagues</h3>
           <p class="hint">One name per line.</p>
@@ -126,7 +179,7 @@
           <h3>Celebrities</h3>
           <div class="admin-table-scroll">
             <table class="admin-table">
-              <thead><tr><th>Celebrity</th><th>Drawn by</th><th>Status</th><th>Ep</th><th>Traitor</th></tr></thead>
+              <thead><tr><th>Celebrity</th><th>Drawn by</th><th>Starting role</th></tr></thead>
               <tbody id="admin-rows"></tbody>
             </table>
           </div>
@@ -144,7 +197,22 @@
     </form>
   </dialog>
 
-  <script src="data.js?v=6"></script>
-  <script src="app.js?v=6"></script>
+  <!-- Points history -->
+  <dialog id="hist" class="admin hist">
+    <form method="dialog" class="admin-inner">
+      <header class="admin-head">
+        <div>
+          <h2 id="hist-name"></h2>
+          <p class="hist-sub" id="hist-sub"></p>
+        </div>
+        <button class="icon-btn" value="close" aria-label="Close">✕</button>
+      </header>
+      <div class="hist-body" id="hist-body"></div>
+    </form>
+  </dialog>
+
+  <script src="data.js?v=10"></script>
+  <script src="scoring.js?v=10"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
