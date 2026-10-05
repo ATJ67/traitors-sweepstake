@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=10" />
+  <link rel="stylesheet" href="styles.css?v=15" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗡️</text></svg>" />
 </head>
 <body>
@@ -24,33 +24,29 @@
       <div class="seats" id="seats"></div>
     </section>
 
-    <section class="board" id="board" hidden aria-label="Leaderboard">
+    <section class="board" id="board" hidden aria-label="Scoreboard">
       <div class="board-main">
         <header class="board-head">
-          <h2>Leaderboard</h2>
-          <div class="legend">
-            <span class="g-placement">Placement <small>surviving</small></span>
-            <span class="g-faithful">Faithful <small>deduction</small></span>
-            <span class="g-traitor">Traitor <small>deception</small></span>
-            <span class="g-winner">Winner <small>+5 bonus</small></span>
-          </div>
+          <h2>Scoreboard</h2>
+          <p class="board-sub">Click a celebrity for their points history</p>
         </header>
         <table class="lb">
           <thead>
             <tr>
-              <th class="rk">#</th><th>Contestant</th><th>Role · Status</th>
-              <th class="num g-placement">Placement</th><th class="num g-faithful">Faithful</th>
-              <th class="num g-traitor">Traitor</th><th class="num g-winner">Winner</th>
-              <th class="num">Bonus</th><th class="num total">Total</th>
+              <th class="rk">Rank</th><th>Participant</th><th>Celebrity</th>
+              <th class="num bd">Survival</th><th class="num bd">Murder</th><th class="num bd">Recruit&shy;ment</th><th class="num bd">Other</th>
+              <th class="num bd">Celeb score</th><th class="num bd">Multi&shy;plier</th><th class="num">Points</th><th class="num total">Total</th>
             </tr>
           </thead>
           <tbody id="lb-rows"></tbody>
         </table>
-        <p class="board-note">Placement for anyone still in is provisional (in italics): the minimum they're now guaranteed. Click a contestant for their points history.</p>
-      </div>
-      <div class="board-side">
-        <h3>Sweepstake standings</h3>
-        <ol class="players" id="players"></ol>
+        <ul class="rules" aria-label="Key rules">
+          <li><b>Survival</b> start on 1, +1 for every elimination you outlast · winners reach 21</li>
+          <li><b>Winner</b> +5</li>
+          <li><b class="f">Faithful</b> +2 vote for any Traitor · +2 Traitor banished · +2 survive a murder with a Shield · +2 recruited</li>
+          <li><b class="t">Traitor</b> +1 per murder · +2 Faithful banished</li>
+          <li><b>Everyone</b> +1 for zero Round Table votes</li>
+        </ul>
       </div>
     </section>
 
@@ -59,7 +55,7 @@
 
       <div class="views" role="tablist" aria-label="View">
         <button type="button" data-view="table" class="on" title="Round Table (L)">Round Table</button>
-        <button type="button" data-view="board" title="Leaderboard (L)">Leaderboard</button>
+        <button type="button" data-view="board" title="Scoreboard (L)">Scoreboard</button>
       </div>
 
       <div class="countdown" id="countdown" aria-live="polite">
@@ -179,7 +175,7 @@
           <h3>Celebrities</h3>
           <div class="admin-table-scroll">
             <table class="admin-table">
-              <thead><tr><th>Celebrity</th><th>Drawn by</th><th>Starting role</th></tr></thead>
+              <thead><tr><th>Celebrity</th><th>Drawn by</th><th>Multiplier</th><th>Starting role</th></tr></thead>
               <tbody id="admin-rows"></tbody>
             </table>
           </div>
@@ -211,8 +207,8 @@
     </form>
   </dialog>
 
-  <script src="data.js?v=10"></script>
-  <script src="scoring.js?v=10"></script>
-  <script src="app.js?v=10"></script>
+  <script src="data.js?v=15"></script>
+  <script src="scoring.js?v=15"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>

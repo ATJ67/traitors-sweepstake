@@ -281,9 +281,10 @@
   tick();
   setInterval(tick, 1000);
 
-  // ── Leaderboard ────────────────────────────────────────
-  const GROUP_LABEL = { placement: "Placement", faithful: "Faithful", traitor: "Traitor", winner: "Winner" };
-  const fmtPts = (n) => (n ? String(n) : "–");
+  // ── Scoreboard ─────────────────────────────────────────
+  // Laid out as in the games team's deck: one block per participant, a row
+  // per celebrity they drew, celeb score × multiplier = points contributed.
+  const fmtPts = (n) => (n ? String(n) : "0");
 
   function roleLabel(s) {
     if (s.originalRole === "Faithful" && s.role === "Traitor") return "Traitor (recruited)";
@@ -294,81 +295,79 @@
     if (s.status === "winner") return "Winner";
     return { murdered: "Murdered", banished: "Banished", left: "Left" }[s.status] + (s.exitEp ? " · Ep " + s.exitEp : "");
   }
+  // Standard competition ranking: 1, 2, 2, 4 … shown as 🥇🥈🥉 or "=4" for ties
   function ranked(rows, key) {
     rows.sort((a, b) => key(b) - key(a) || a.name.localeCompare(b.name));
     let rank = 0, prev = null;
     rows.forEach((r, i) => { const k = key(r); if (k !== prev) { rank = i + 1; prev = k; } r.rank = rank; });
+    rows.forEach((r) => { r.tied = rows.filter((x) => x.rank === r.rank).length > 1; });
     return rows;
+  }
+  const MEDALS = { 1: "🥇", 2: "🥈", 3: "🥉" };
+
+  function participants() {
+    const players = {};
+    state.celebs.forEach((c) => {
+      const key = c.colleague || "Unassigned";
+      const p = (players[key] = players[key] || { name: key, total: 0, celebs: [] });
+      const s = sc(c.name);
+      p.total += s.contributed;
+      p.celebs.push(s);
+    });
+    Object.values(players).forEach((p) => p.celebs.sort((a, b) => b.contributed - a.contributed || a.name.localeCompare(b.name)));
+    return ranked(Object.values(players), (p) => p.total);
   }
 
   function renderBoard() {
-    const byName = Object.fromEntries(state.celebs.map((c) => [c.name, c]));
-    const rows = ranked(score.names.map((n) => ({ ...sc(n), colleague: byName[n].colleague })), (r) => r.total);
     const tbody = $("lb-rows");
     tbody.innerHTML = "";
-    rows.forEach((r) => {
-      const tr = el("tr", "st-" + r.status);
-      tr.tabIndex = 0;
-      tr.onclick = () => openHistory(r.name);
-      tr.onkeydown = (e) => { if (e.key === "Enter") openHistory(r.name); };
-      tr.appendChild(el("td", "rk", r.rank));
-      const who = el("td", "who-cell");
-      who.appendChild(el("div", "lb-name", r.name));
-      who.appendChild(el("div", "lb-col", r.colleague || "Unassigned"));
-      tr.appendChild(who);
-      const rs = el("td", "rs");
-      rs.appendChild(el("div", "role " + (r.role === "Traitor" ? "is-traitor" : "is-faithful"), roleLabel(r)));
-      rs.appendChild(el("div", "status", statusLabel(r)));
-      tr.appendChild(rs);
-      const pl = el("td", "num g-placement" + (r.provisional ? " prov" : ""), r.placement);
-      if (r.provisional) pl.title = "Still in: the minimum placement points they're now guaranteed";
-      tr.appendChild(pl);
-      tr.appendChild(el("td", "num g-faithful", fmtPts(r.groups.faithful)));
-      tr.appendChild(el("td", "num g-traitor", fmtPts(r.groups.traitor)));
-      tr.appendChild(el("td", "num g-winner", fmtPts(r.groups.winner)));
-      tr.appendChild(el("td", "num bonus", r.bonus));
-      tr.appendChild(el("td", "num total", r.total));
-      tbody.appendChild(tr);
-    });
-
-    // Sweepstake standings: each colleague's celebrities added together
-    const players = {};
-    state.celebs.forEach((c) => {
-      if (!c.colleague) return;
-      const p = (players[c.colleague] = players[c.colleague] || { name: c.colleague, total: 0, celebs: [] });
-      p.total += sc(c.name).total;
-      p.celebs.push(sc(c.name));
-    });
-    const list = $("players");
-    list.innerHTML = "";
-    ranked(Object.values(players), (p) => p.total).forEach((p) => {
-      const li = el("li");
-      li.appendChild(el("span", "p-rank", p.rank));
-      const mid = el("div", "p-mid");
-      mid.appendChild(el("div", "p-name", p.name));
-      const cs = el("div", "p-celebs");
-      p.celebs.forEach((s) => {
-        const chip = el("span", "p-celeb st-" + s.status, s.name + " " + s.total);
-        chip.onclick = () => openHistory(s.name);
-        cs.appendChild(chip);
+    participants().forEach((p, pi) => {
+      p.celebs.forEach((s, i) => {
+        const tr = el("tr", "st-" + s.status + (i === 0 ? " first" : "") + (pi % 2 ? " alt" : ""));
+        if (i === 0) {
+          const rk = el("td", "rk", MEDALS[p.rank] || (p.tied ? "=" : "") + p.rank);
+          rk.rowSpan = p.celebs.length;
+          tr.appendChild(rk);
+          const pn = el("td", "p-name", p.name);
+          pn.rowSpan = p.celebs.length;
+          tr.appendChild(pn);
+        }
+        const who = el("td", "who-cell");
+        who.appendChild(el("div", "lb-name", s.name));
+        const meta = el("div", "lb-meta");
+        meta.appendChild(el("span", s.role === "Traitor" ? "is-traitor" : "is-faithful", roleLabel(s)));
+        meta.append(" · " + statusLabel(s));
+        who.appendChild(meta);
+        who.tabIndex = 0;
+        who.onclick = () => openHistory(s.name);
+        who.onkeydown = (e) => { if (e.key === "Enter") openHistory(s.name); };
+        tr.appendChild(who);
+        tr.appendChild(el("td", "num bd", s.cols.survival));
+        tr.appendChild(el("td", "num bd c-murder" + (s.cols.murder ? " pos" : ""), s.cols.murder ? "+" + s.cols.murder : "0"));
+        tr.appendChild(el("td", "num bd c-recruit" + (s.cols.recruitment ? " pos" : ""), s.cols.recruitment ? "+" + s.cols.recruitment : "0"));
+        tr.appendChild(el("td", "num bd c-other" + (s.cols.other ? " pos" : ""), s.cols.other ? "+" + s.cols.other : "0"));
+        tr.appendChild(el("td", "num bd score", s.celebScore));
+        tr.appendChild(el("td", "num bd mult" + (s.multiplier !== 1 ? " x" : ""), "×" + s.multiplier));
+        tr.appendChild(el("td", "num contrib", s.contributed));
+        if (i === 0) {
+          const tot = el("td", "num total", p.total);
+          tot.rowSpan = p.celebs.length;
+          tr.appendChild(tot);
+        }
+        tbody.appendChild(tr);
       });
-      mid.appendChild(cs);
-      li.appendChild(mid);
-      li.appendChild(el("span", "p-total", p.total));
-      list.appendChild(li);
     });
     fitBoard();
   }
 
-  // Keep the leaderboard on one screen: shrink rows until it fits.
+  // Keep the scoreboard on one screen: shrink rows until it fits.
   function fitBoard() {
     const board = $("board");
     if (board.hidden) return;
-    board.style.setProperty("--bs", 1);
     for (let k = 1; k >= 0.6; k -= 0.03) {
       board.style.setProperty("--bs", k.toFixed(2));
       const table = board.querySelector(".lb"), main = board.querySelector(".board-main");
-      if (board.scrollHeight <= board.clientHeight + 1 && table.scrollWidth <= main.clientWidth + 1) break;
+      if (main.scrollHeight <= main.clientHeight + 1 && table.scrollWidth <= main.clientWidth + 1) break;
     }
   }
   new ResizeObserver(fitBoard).observe($("board"));
@@ -398,24 +397,30 @@
     $("hist-sub").textContent = [c.colleague ? "Drawn by " + c.colleague : "Unassigned", roleLabel(s) + (s.recruitedEp ? " from Ep " + s.recruitedEp : ""), statusLabel(s)].join(" · ");
 
     const sum = el("div", "hist-sum");
-    T.GROUPS.forEach((g) => {
-      const box = el("div", "hs g-" + g);
-      box.appendChild(el("strong", null, s.groups[g] + (g === "placement" && s.provisional ? "*" : "")));
-      box.appendChild(el("span", null, GROUP_LABEL[g]));
-      sum.appendChild(box);
-    });
-    const tot = el("div", "hs total");
-    tot.appendChild(el("strong", null, s.total));
-    tot.appendChild(el("span", null, "Total"));
-    sum.appendChild(tot);
+    const box = (val, label, cls) => {
+      const b = el("div", "hs " + (cls || ""));
+      b.appendChild(el("strong", null, val));
+      b.appendChild(el("span", null, label));
+      sum.appendChild(b);
+    };
+    T.COLS.forEach((k) => box(s.cols[k], T.COL_LABEL[k], "c-" + k));
+    box(s.celebScore, "Celeb score", "total");
     body.appendChild(sum);
+    if (s.multiplier !== 1) {
+      body.appendChild(el("p", "hist-mult", `×${s.multiplier} multiplier: contributes ${s.contributed} points to ${c.colleague}`));
+    }
 
-    // every category from the brief, even when zero
+    // every scoring category, even when zero
     const cats = el("dl", "hist-cats");
+    const survivalRow = el("div", "c-survival");
+    survivalRow.appendChild(el("dt", null, "Survival"));
+    survivalRow.title = s.log[0].note;
+    survivalRow.appendChild(el("dd", null, s.survival));
+    cats.appendChild(survivalRow);
     Object.entries(T.CATS).forEach(([k, def]) => {
-      if (k === "placement") return;
-      const label = def.label + (k === "zeroVoteF" ? " (Faithful)" : k === "zeroVoteT" ? " (Traitor)" : "");
-      const row = el("div", "g-" + def.group + (s.cats[k] ? "" : " zero"));
+      if (k === "survival") return;
+      const label = def.label + (def.role ? " (" + def.role + ")" : "");
+      const row = el("div", "c-" + def.col + (s.cats[k] ? "" : " zero"));
       row.appendChild(el("dt", null, label));
       row.appendChild(el("dd", null, s.cats[k] || 0));
       cats.appendChild(row);
@@ -423,13 +428,13 @@
     body.appendChild(cats);
 
     const hist = T.history(s);
-    if (!hist.length) body.appendChild(el("p", "hint", "No points scored yet."));
+    if (!hist.length) body.appendChild(el("p", "hint", "No bonus points yet."));
     hist.forEach((h) => {
       const sec = el("section", "hist-ep");
       sec.appendChild(el("h4", null, h.ep ? "Episode " + h.ep : "Series"));
       const ul = el("ul");
       h.items.forEach((it) => {
-        const li = el("li", "g-" + T.CATS[it.cat].group);
+        const li = el("li", "c-" + T.CATS[it.cat].col);
         li.appendChild(el("span", null, T.CATS[it.cat].label + (it.note ? " — " + it.note : "")));
         li.appendChild(el("b", null, "+" + it.pts));
         ul.appendChild(li);
@@ -441,7 +446,6 @@
       sec.appendChild(ul);
       body.appendChild(sec);
     });
-    if (s.provisional) body.appendChild(el("p", "hint", "* Still in the game: placement shows the minimum they're now guaranteed, and locks in when they leave."));
     histDlg.showModal();
   }
 
@@ -476,6 +480,9 @@
       const opts = [""].concat(names);
       if (c.colleague && !names.includes(c.colleague)) opts.push(c.colleague);
       tr.appendChild(wrapTd(select(opts.map((n) => [n, n || "— Unassigned —"]), c.colleague, (v) => { c.colleague = v; })));
+      tr.appendChild(wrapTd(select([["1", "×1"], ["2", "×2"], ["3", "×3"]], String(c.multiplier || 1), (v) => {
+        if (v === "1") delete c.multiplier; else c.multiplier = Number(v);
+      })));
       tr.appendChild(wrapTd(select([["Faithful", "Faithful"], ["Traitor", "Traitor"]], traitors.has(c.name) ? "Traitor" : "Faithful", (v) => {
         const set = new Set(draft.originalTraitors || []);
         v === "Traitor" ? set.add(c.name) : set.delete(c.name);
@@ -488,7 +495,7 @@
 
   // Game log editor: every event is edited in place, and the scoring is
   // re-run after each change so the dropdowns only offer who's still in.
-  const EVENT_LABEL = { murder: "Murder", recruit: "Recruitment", roundtable: "Round Table", exit: "Left the game", final: "The Final" };
+  const EVENT_LABEL = { murder: "Murder / attempt", recruit: "Recruitment", roundtable: "Round Table", exit: "Left the game", final: "The Final" };
   function renderLog() {
     const sim = T.compute(draft);
     const list = $("log-list");
@@ -523,7 +530,10 @@
       const field = (label, control) => { const l = el("label", "ev-field", label); l.appendChild(control); body.appendChild(l); };
 
       if (ev.type === "murder") {
-        field("Victim", select([["", "— No murder (shield, recruitment, twist) —"]].concat(activeOpts), ev.victim, (v) => { ev.victim = v || null; renderLog(); }));
+        field("Victim", select([["", "— No murder (Shield, recruitment, twist) —"]].concat(activeOpts), ev.victim, (v) => { ev.victim = v || null; if (v) delete ev.shielded; renderLog(); }));
+        if (!ev.victim) {
+          field("Shield saved", select([["", "— nobody —"]].concat(step.active.filter((n) => step.roles[n] === "Faithful").map((n) => [n, n])), ev.shielded, (v) => { ev.shielded = v || null; renderLog(); }));
+        }
       } else if (ev.type === "recruit") {
         field("Recruited", select([["", "— choose —"]].concat(step.active.filter((n) => step.roles[n] === "Faithful").map((n) => [n, n])), ev.who, (v) => { ev.who = v; renderLog(); }));
         field("Outcome", select([["yes", "Accepted"], ["no", "Declined"]], ev.accepted === false ? "no" : "yes", (v) => { ev.accepted = v === "yes"; renderLog(); }));

@@ -6,7 +6,8 @@
 //  Every point is calculated from `events` by scoring.js — never
 //  enter totals by hand. Event types, in the order they happened:
 //
-//   { ep, type: "murder",     victim }                 victim: null = no murder
+//   { ep, type: "murder",     victim, shielded }       victim: null = no murder;
+//                                                      shielded: Faithful whose Shield stopped it
 //   { ep, type: "recruit",    who, accepted }          accepted: false = declined
 //   { ep, type: "roundtable", votes: { voter: target }, revotes: [{ voter: target }],
 //                             absent: [names], banished }
@@ -34,7 +35,8 @@ window.SWEEPSTAKE = {
     "2026-10-30T20:00:00+00:00"
   ],
 
-  // From "The Draw" slide (Syneos sweepstake deck)
+  // From "The Draw" slide (Syneos sweepstake deck). Lauren has one chip
+  // worth ×2, so Sebastian Croft's score counts double for her.
   colleagues: ["Alex", "Ali", "Anu", "Claire", "Hattie", "Joe", "Kate", "Lauren", "Mario", "Mollie", "Reagan"],
 
   celebs: [
@@ -57,7 +59,7 @@ window.SWEEPSTAKE = {
     { name: "Rob Beckett",         role: "Comedian",                    colleague: "Ali",    photo: "" },
     { name: "Romesh Ranganathan",  role: "Comedian",                    colleague: "Mollie", photo: "" },
     { name: "Ross Kemp",           role: "Actor & broadcaster",         colleague: "Alex",   photo: "" },
-    { name: "Sebastian Croft",     role: "Actor",                       colleague: "Lauren", photo: "" },
+    { name: "Sebastian Croft",     role: "Actor",                       colleague: "Lauren", photo: "", multiplier: 2 },
     { name: "Sharon Rooney",       role: "Actress",                     colleague: "Anu",    photo: "" }
   ],
 
