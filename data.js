@@ -69,6 +69,38 @@ window.SWEEPSTAKE = {
     // Ep 1 ended on a cliffhanger: no murder or Round Table shown yet.
     // Ep 2: the Traitors murdered Amol Rajan and recruited James Acaster.
     { ep: 2, type: "murder", victim: "Amol Rajan" },
-    { ep: 2, type: "recruit", who: "James Acaster", accepted: true }
+    { ep: 2, type: "recruit", who: "James Acaster", accepted: true },
+
+    // Round Table held at the end of Ep 2; result shown in Ep 3.
+    // Richard banished 16–2–1–1 (votes from live blogs; Joe Lycett and Julie
+    // unreported but implied by the 16-vote total).
+    { ep: 3, type: "roundtable", absent: [], revotes: [], banished: "Richard E. Grant", votes: {
+      "Bella Ramsey": "Richard E. Grant", "Hannah Fry": "Richard E. Grant", "James Acaster": "Richard E. Grant",
+      "James Blunt": "Hannah Fry", "Jerry Hall": "Leigh-Anne Pinnock", "Joanne McNally": "Leigh-Anne Pinnock",
+      "Joe Lycett": "Richard E. Grant", "Julie Hesmondhalgh": "Richard E. Grant", "King Kenny": "Richard E. Grant",
+      "Leigh-Anne Pinnock": "Richard E. Grant", "Maya Jama": "Richard E. Grant", "Michael Sheen": "Richard E. Grant",
+      "Miranda Hart": "Richard E. Grant", "Myha'la": "Richard E. Grant", "Richard E. Grant": "Bella Ramsey",
+      "Rob Beckett": "Richard E. Grant", "Romesh Ranganathan": "Richard E. Grant", "Ross Kemp": "Richard E. Grant",
+      "Sebastian Croft": "Richard E. Grant", "Sharon Rooney": "Richard E. Grant"
+    } },
+
+    // Ep 3: instead of murdering, the Traitors recruited Hannah Fry.
+    { ep: 3, type: "murder", victim: null },
+    { ep: 3, type: "recruit", who: "Hannah Fry", accepted: true },
+
+    // Myha'la banished 13–4–1–1. One "James" voted Michael (unclear which) —
+    // doesn't affect scoring either way; Julie and the other James implied
+    // by the 13-vote total.
+    { ep: 3, type: "roundtable", absent: [], revotes: [], banished: "Myha'la", votes: {
+      "Bella Ramsey": "Myha'la", "Hannah Fry": "Myha'la", "James Acaster": "Myha'la",
+      "James Blunt": "Michael Sheen", "Jerry Hall": "Myha'la", "Joanne McNally": "Jerry Hall",
+      "Joe Lycett": "Myha'la", "Julie Hesmondhalgh": "Myha'la", "King Kenny": "Jerry Hall",
+      "Leigh-Anne Pinnock": "Jerry Hall", "Maya Jama": "Jerry Hall", "Michael Sheen": "Myha'la",
+      "Miranda Hart": "Myha'la", "Myha'la": "Julie Hesmondhalgh", "Rob Beckett": "Myha'la",
+      "Romesh Ranganathan": "Myha'la", "Ross Kemp": "Myha'la", "Sebastian Croft": "Myha'la",
+      "Sharon Rooney": "Myha'la"
+    } }
+    // Ep 3 ended with the Traitors choosing between James Blunt, Bella and
+    // Sebastian to murder — result in Ep 4.
   ]
 };
