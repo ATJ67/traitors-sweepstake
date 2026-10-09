@@ -10,7 +10,9 @@
 //                                                      shielded: Faithful whose Shield stopped it
 //   { ep, type: "recruit",    who, accepted }          accepted: false = declined
 //   { ep, type: "roundtable", votes: { voter: target }, revotes: [{ voter: target }],
-//                             absent: [names], banished }
+//                             absent: [names], banished, votingComplete }
+//                             votingComplete: true once every vote is known —
+//                             zero-vote points are only given when it is
 //   { ep, type: "exit",       who }                    left the game any other way
 //   { ep, type: "final",      winners: [names] }
 // ─────────────────────────────────────────────────────────────
@@ -74,7 +76,7 @@ window.SWEEPSTAKE = {
     // Round Table held at the end of Ep 2; result shown in Ep 3.
     // Richard banished 16–2–1–1 (votes from live blogs; Joe Lycett and Julie
     // unreported but implied by the 16-vote total).
-    { ep: 3, type: "roundtable", absent: [], revotes: [], banished: "Richard E. Grant", votes: {
+    { ep: 3, type: "roundtable", absent: [], revotes: [], banished: "Richard E. Grant", votingComplete: true, votes: {
       "Bella Ramsey": "Richard E. Grant", "Hannah Fry": "Richard E. Grant", "James Acaster": "Richard E. Grant",
       "James Blunt": "Hannah Fry", "Jerry Hall": "Leigh-Anne Pinnock", "Joanne McNally": "Leigh-Anne Pinnock",
       "Joe Lycett": "Richard E. Grant", "Julie Hesmondhalgh": "Richard E. Grant", "King Kenny": "Richard E. Grant",
@@ -88,12 +90,11 @@ window.SWEEPSTAKE = {
     { ep: 3, type: "murder", victim: null },
     { ep: 3, type: "recruit", who: "Hannah Fry", accepted: true },
 
-    // Myha'la banished 13–4–1–1. One "James" voted Michael (unclear which) —
-    // doesn't affect scoring either way; Julie and the other James implied
-    // by the 13-vote total.
-    { ep: 3, type: "roundtable", absent: [], revotes: [], banished: "Myha'la", votes: {
-      "Bella Ramsey": "Myha'la", "Hannah Fry": "Myha'la", "James Acaster": "Myha'la",
-      "James Blunt": "Michael Sheen", "Jerry Hall": "Myha'la", "Joanne McNally": "Jerry Hall",
+    // Myha'la banished 13–4–1–1 (James Acaster's vote for Michael Sheen per
+    // the Wikipedia voting table, rev 1379299498).
+    { ep: 3, type: "roundtable", absent: [], revotes: [], banished: "Myha'la", votingComplete: true, votes: {
+      "Bella Ramsey": "Myha'la", "Hannah Fry": "Myha'la", "James Acaster": "Michael Sheen",
+      "James Blunt": "Myha'la", "Jerry Hall": "Myha'la", "Joanne McNally": "Jerry Hall",
       "Joe Lycett": "Myha'la", "Julie Hesmondhalgh": "Myha'la", "King Kenny": "Jerry Hall",
       "Leigh-Anne Pinnock": "Jerry Hall", "Maya Jama": "Jerry Hall", "Michael Sheen": "Myha'la",
       "Miranda Hart": "Myha'la", "Myha'la": "Julie Hesmondhalgh", "Rob Beckett": "Myha'la",

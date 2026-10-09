@@ -12,7 +12,7 @@ window.TraitorsScoring = (function () {
   // Each scoring category, its points and which bucket it counts towards.
   const CATS = {
     // col: which scoreboard column it counts towards
-    survival:         { label: "Survival",                         col: "survival" },
+    survival:         { label: "Survival",                         col: "survival",    pts: 1 },
     traitorVote:      { label: "Voted for a Traitor",              col: "other",       role: "Faithful", pts: 2 },
     traitorBanished:  { label: "Traitor banished",                 col: "other",       role: "Faithful", pts: 2 },
     shield:           { label: "Survived a murder with a Shield",  col: "other",       role: "Faithful", pts: 2 },
@@ -45,11 +45,16 @@ window.TraitorsScoring = (function () {
       S[n].cats[cat] = (S[n].cats[cat] || 0) + pts;
       S[n].log.push({ ep, cat, pts, note });
     };
+    // Survival: everyone starts on 1, and everyone still in gets +1 each time
+    // someone leaves. A sole winner reaches 21; joint winners don't get topped up.
     const leave = (n, status, ep) => {
       const s = S[n];
       s.status = status; s.exitEp = ep; s.position = ++position; s.roleAtExit = s.role;
+      active().forEach((w) => add(w, "survival", ep, n + " eliminated"));
     };
     const isActive = (n) => S[n] && S[n].status === "active";
+
+    names.forEach((n) => add(n, "survival", 1, "Starting survival point"));
 
     (data.events || []).forEach((ev, i) => {
       steps[i] = { active: active(), roles: Object.fromEntries(names.map((n) => [n, S[n].role])) };
@@ -57,7 +62,7 @@ window.TraitorsScoring = (function () {
 
       if (ev.type === "murder") {
         // A Faithful whose Shield stopped the murder gets +2 (and no murder point).
-        if (ev.shielded && isActive(ev.shielded) && S[ev.shielded].role === "Faithful") {
+        if (!ev.victim && ev.shielded && isActive(ev.shielded) && S[ev.shielded].role === "Faithful") {
           add(ev.shielded, "shield", ep, "Shield blocked the murder");
         }
         // The whole Traitor team that night gets +1 for a completed murder.
@@ -85,9 +90,17 @@ window.TraitorsScoring = (function () {
         const gotVotes = new Set();
         rounds.forEach((r) => voters.forEach((v) => { if (r[v]) gotVotes.add(r[v]); }));
 
+        // Zero-vote points only when every vote is recorded: a gap in the data
+        // must never look like someone receiving no votes. Marked explicitly
+        // with votingComplete, or implied by a full first round and no re-votes.
+        const votingComplete =
+          (ev.votingComplete === true || (ev.votingComplete === undefined && !(ev.revotes || []).length)) &&
+          voters.every((n) => !!(ev.votes || {})[n]) &&
+          (ev.revotes || []).every((r) => Object.values(r).some(Boolean));
+
         voters.forEach((p) => {
           const role = S[p].role;
-          if (!gotVotes.has(p)) add(p, "zeroVote", ep);
+          if (votingComplete && !gotVotes.has(p)) add(p, "zeroVote", ep);
           if (role === "Faithful") {
             const hit = rounds.map((r) => r[p]).find((t) => t && S[t] && S[t].role === "Traitor");
             if (hit) add(p, "traitorVote", ep, "voted for " + hit);
@@ -118,23 +131,14 @@ window.TraitorsScoring = (function () {
     });
     steps[(data.events || []).length] = { active: active(), roles: Object.fromEntries(names.map((n) => [n, S[n].role])) };
 
-    // Survival: start on 1, +1 each time someone else is eliminated while
-    // you're still in — i.e. the number of people out when you leave, plus
-    // one. Winners reach the full 21.
     const eliminated = names.filter((n) => OUT.includes(S[n].status)).length;
     names.forEach((n) => {
       const s = S[n];
-      if (s.status === "winner") s.survival = total;
-      else if (OUT.includes(s.status)) s.survival = s.position;
-      else s.survival = eliminated + 1;
-      s.log.unshift({ ep: null, cat: "survival", pts: s.survival,
-        note: s.status === "winner" ? "Winner — full survival points"
-          : OUT.includes(s.status) ? ordinal(s.position) + " to leave"
-          : "Still in: 1 + " + eliminated + " eliminated so far" });
+      s.survival = s.cats.survival || 0;
 
       const c = data.celebs.find((x) => x.name === n);
       s.multiplier = (c && c.multiplier) || 1;
-      s.cols = { survival: s.survival, murder: 0, recruitment: 0, other: 0 };
+      s.cols = { survival: 0, murder: 0, recruitment: 0, other: 0 };
       Object.entries(s.cats).forEach(([cat, pts]) => { s.cols[CATS[cat].col] += pts; });
       s.celebScore = s.cols.survival + s.cols.murder + s.cols.recruitment + s.cols.other;
       s.contributed = s.celebScore * s.multiplier;
@@ -147,7 +151,7 @@ window.TraitorsScoring = (function () {
   // Scoring history grouped by episode, for the contestant detail view.
   function history(s) {
     const byEp = new Map();
-    s.log.filter((x) => x.cat !== "survival").sort((a, b) => (a.ep || 0) - (b.ep || 0)).forEach((item) => {
+    s.log.slice().sort((a, b) => (a.ep || 0) - (b.ep || 0)).forEach((item) => {
       if (!byEp.has(item.ep)) byEp.set(item.ep, []);
       byEp.get(item.ep).push(item);
     });

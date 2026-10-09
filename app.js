@@ -414,7 +414,7 @@
     const cats = el("dl", "hist-cats");
     const survivalRow = el("div", "c-survival");
     survivalRow.appendChild(el("dt", null, "Survival"));
-    survivalRow.title = s.log[0].note;
+    survivalRow.title = "1 starting point + 1 for each elimination outlasted";
     survivalRow.appendChild(el("dd", null, s.survival));
     cats.appendChild(survivalRow);
     Object.entries(T.CATS).forEach(([k, def]) => {
@@ -428,7 +428,7 @@
     body.appendChild(cats);
 
     const hist = T.history(s);
-    if (!hist.length) body.appendChild(el("p", "hint", "No bonus points yet."));
+    if (!hist.length) body.appendChild(el("p", "hint", "No points yet."));
     hist.forEach((h) => {
       const sec = el("section", "hist-ep");
       sec.appendChild(el("h4", null, h.ep ? "Episode " + h.ep : "Series"));
@@ -591,6 +591,12 @@
         }
         body.appendChild(tools2);
         field("Banished", select([["", "— Nobody —"]].concat(step.active.map((n) => [n, tag(n)])), ev.banished, (v) => { ev.banished = v || null; renderLog(); }));
+        const missing = present.filter((n) => !ev.votes[n]).length;
+        const done = el("label", "chk");
+        const doneCb = el("input"); doneCb.type = "checkbox"; doneCb.checked = ev.votingComplete === true;
+        doneCb.onchange = () => { ev.votingComplete = doneCb.checked; renderLog(); };
+        done.append(doneCb, " Every vote is recorded (needed for zero-vote points)" + (missing ? " — " + missing + " vote" + (missing > 1 ? "s" : "") + " still blank" : ""));
+        body.appendChild(done);
       }
       li.appendChild(body);
       list.appendChild(li);

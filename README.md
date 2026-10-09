@@ -20,7 +20,7 @@ Rules from the games team's deck (Syneos sweepstake, scoreboard slide). Every po
 
 | | Points | Column |
 |---|---|---|
-| Survival: start on 1, +1 each time someone else is eliminated while you're still in; winners reach 21 | 1–21 | Survival |
+| Survival: start on 1, +1 each time someone else is eliminated while you're still in (a sole winner reaches 21) | 1–21 | Survival |
 | **Traitor** — successful murder (whole Traitor team that night) | +1 | Murder |
 | **Faithful** — recruited as a Traitor | +2 | Recruitment |
 | **Faithful** — voted for any Traitor at a Round Table | +2 | Other |
@@ -30,7 +30,7 @@ Rules from the games team's deck (Syneos sweepstake, scoreboard slide). Every po
 | Everyone — zero votes at a Round Table (present only) | +1 | Other |
 | Winner | +5 | Other |
 
-Points are scored by role *at the time*; recruits keep their Faithful points. Ties and re-votes count as one Round Table. Rank uses standard competition ranking (1, 2, 2, 4 …), with medals for the top three.
+Points are scored by role *at the time*; recruits keep their Faithful points. Ties and re-votes count as one Round Table. Zero-vote points are only given once every vote at that Round Table is recorded, and the Shield bonus only when no murder happened that night. Celebrity scores are kept in line with the Friends & Family board (yosayssmoe.github.io/-F-F-Celeb-Traitors). Rank uses standard competition ranking (1, 2, 2, 4 …), with medals for the top three.
 
 ## Updating after each episode
 
