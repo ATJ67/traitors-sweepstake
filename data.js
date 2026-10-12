@@ -100,8 +100,24 @@ window.SWEEPSTAKE = {
       "Miranda Hart": "Myha'la", "Myha'la": "Julie Hesmondhalgh", "Rob Beckett": "Myha'la",
       "Romesh Ranganathan": "Myha'la", "Ross Kemp": "Myha'la", "Sebastian Croft": "Myha'la",
       "Sharon Rooney": "Myha'la"
-    } }
+    } },
     // Ep 3 ended with the Traitors choosing between James Blunt, Bella and
     // Sebastian to murder — result in Ep 4.
+
+    // Ep 4: Bella murdered (Maya held a Shield; nobody shielded was targeted).
+    { ep: 4, type: "murder", victim: "Bella Ramsey" },
+
+    // Julie banished 9–6–1–1, revealed Faithful. Votes from the Traitors UK
+    // fandom wiki voting table (all 17 players).
+    { ep: 4, type: "roundtable", absent: [], revotes: [], banished: "Julie Hesmondhalgh", votingComplete: true, votes: {
+      "Hannah Fry": "Jerry Hall", "James Acaster": "Julie Hesmondhalgh", "James Blunt": "Julie Hesmondhalgh",
+      "Jerry Hall": "Hannah Fry", "Joanne McNally": "Julie Hesmondhalgh", "Joe Lycett": "Hannah Fry",
+      "Julie Hesmondhalgh": "James Blunt", "King Kenny": "Hannah Fry", "Leigh-Anne Pinnock": "Hannah Fry",
+      "Maya Jama": "Julie Hesmondhalgh", "Michael Sheen": "Julie Hesmondhalgh", "Miranda Hart": "Julie Hesmondhalgh",
+      "Rob Beckett": "Julie Hesmondhalgh", "Romesh Ranganathan": "Hannah Fry", "Ross Kemp": "Julie Hesmondhalgh",
+      "Sebastian Croft": "Hannah Fry", "Sharon Rooney": "Julie Hesmondhalgh"
+    } }
+    // Ep 4 ended with Leigh-Anne, Rob, Romesh and Ross shortlisted for murder
+    // (Leigh-Anne holds the crypt key; Kenny and Sebastian hold Shields).
   ]
 };
