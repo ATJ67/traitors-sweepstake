@@ -116,8 +116,21 @@ window.SWEEPSTAKE = {
       "Maya Jama": "Julie Hesmondhalgh", "Michael Sheen": "Julie Hesmondhalgh", "Miranda Hart": "Julie Hesmondhalgh",
       "Rob Beckett": "Julie Hesmondhalgh", "Romesh Ranganathan": "Hannah Fry", "Ross Kemp": "Julie Hesmondhalgh",
       "Sebastian Croft": "Hannah Fry", "Sharon Rooney": "Julie Hesmondhalgh"
-    } }
+    } },
     // Ep 4 ended with Leigh-Anne, Rob, Romesh and Ross shortlisted for murder
     // (Leigh-Anne holds the crypt key; Kenny and Sebastian hold Shields).
+    // Ep 5: Rob murdered (from the hide-and-seek shortlist; Leigh-Anne's key
+    // wasn't used). Hannah banished 12–1–1–1, revealed Traitor. Then the
+    // Traitors recruited King Kenny. Matches Joe's board (Wikipedia) and the
+    // fandom wiki voting table.
+    { ep: 5, type: "murder", victim: "Rob Beckett" },
+    { ep: 5, type: "roundtable", absent: [], revotes: [], banished: "Hannah Fry", votingComplete: true, votes: {
+      "Hannah Fry": "Jerry Hall", "James Acaster": "Hannah Fry", "James Blunt": "Hannah Fry",
+      "Jerry Hall": "Hannah Fry", "Joanne McNally": "Sebastian Croft", "Joe Lycett": "Hannah Fry",
+      "King Kenny": "Hannah Fry", "Leigh-Anne Pinnock": "Hannah Fry", "Maya Jama": "Hannah Fry",
+      "Michael Sheen": "Hannah Fry", "Miranda Hart": "Hannah Fry", "Romesh Ranganathan": "James Blunt",
+      "Ross Kemp": "Hannah Fry", "Sebastian Croft": "Hannah Fry", "Sharon Rooney": "Hannah Fry"
+    } },
+    { ep: 5, type: "recruit", who: "King Kenny", accepted: true }
   ]
 };
