@@ -131,6 +131,17 @@ window.SWEEPSTAKE = {
       "Michael Sheen": "Hannah Fry", "Miranda Hart": "Hannah Fry", "Romesh Ranganathan": "James Blunt",
       "Ross Kemp": "Hannah Fry", "Sebastian Croft": "Hannah Fry", "Sharon Rooney": "Hannah Fry"
     } },
-    { ep: 5, type: "recruit", who: "King Kenny", accepted: true }
+    { ep: 5, type: "recruit", who: "King Kenny", accepted: true },
+
+    // Ep 6: no murder (the night was used to recruit Kenny). Joe Lycett
+    // banished 11–1–1–1, revealed Faithful. Matches Joe's board (Wikipedia)
+    // and the fandom wiki voting table. Maya held a Shield.
+    { ep: 6, type: "roundtable", absent: [], revotes: [], banished: "Joe Lycett", votingComplete: true, votes: {
+      "James Acaster": "Joanne McNally", "James Blunt": "Joe Lycett", "Jerry Hall": "Joe Lycett",
+      "Joanne McNally": "Joe Lycett", "Joe Lycett": "James Blunt", "King Kenny": "Joe Lycett",
+      "Leigh-Anne Pinnock": "Joe Lycett", "Maya Jama": "Joe Lycett", "Michael Sheen": "Joe Lycett",
+      "Miranda Hart": "Ross Kemp", "Romesh Ranganathan": "Joe Lycett", "Ross Kemp": "Joe Lycett",
+      "Sebastian Croft": "Joe Lycett", "Sharon Rooney": "Joe Lycett"
+    } }
   ]
 };
