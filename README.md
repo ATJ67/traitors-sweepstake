@@ -38,6 +38,16 @@ Points are scored by role *at the time*; recruits keep their Faithful points. Ti
 2. Add what happened, in order: **Murder / attempt** (pick the victim, or who a Shield saved), **Round Table** (who voted for whom, any re-votes, who was banished), **Recruitment**, **Left the game**, **The Final**.
 3. **Save** to see it in that browser. To update the live site for everyone, click **Export data.js**, replace `data.js` in this repo with the download, and push.
 
+## Automatic updates
+
+`tools/sync.mjs` runs on Alex's Mac via launchd (`~/Library/LaunchAgents/com.alexjacobs.traitors-sync.plist`): at login and every 30 minutes, but it only does the work once per day.
+
+1. **Joe's board first** — if [the Friends & Family board](https://yosayssmoe.github.io/-F-F-Celeb-Traitors/) has the latest aired episode fully scored, its event log is adopted (read as data, never executed). If Joe changes his scoring rules, you get a notification instead.
+2. **Otherwise the web** — a headless Claude session (web search/read only) researches the missing episode(s); the results are only used if they pass validation.
+3. Every change is replayed and validated (players still in, voters present, banished player had the most votes) before it is committed and pushed. A macOS notification reports what happened.
+
+Run it now: `node ~/Traitors/tools/sync.mjs --force` · Log: `~/Library/Logs/traitors-sync.log`
+
 ## Files
 
 - `data.js` — line-up, the draw (and multipliers), starting Traitors, episode air times and the event log (edit this)
