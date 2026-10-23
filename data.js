@@ -142,6 +142,16 @@ window.SWEEPSTAKE = {
       "Leigh-Anne Pinnock": "Joe Lycett", "Maya Jama": "Joe Lycett", "Michael Sheen": "Joe Lycett",
       "Miranda Hart": "Ross Kemp", "Romesh Ranganathan": "Joe Lycett", "Ross Kemp": "Joe Lycett",
       "Sebastian Croft": "Joe Lycett", "Sharon Rooney": "Joe Lycett"
+    } },
+
+    // Ep 7: Ross Kemp murdered. Jerry Hall banished 9–1–1–1, revealed
+    // Faithful. Matches Joe's board (Wikipedia) and the fandom wiki table.
+    { ep: 7, type: "murder", victim: "Ross Kemp" },
+    { ep: 7, type: "roundtable", absent: [], revotes: [], banished: "Jerry Hall", votingComplete: true, votes: {
+      "James Acaster": "Jerry Hall", "James Blunt": "Jerry Hall", "Jerry Hall": "Joanne McNally",
+      "Joanne McNally": "Jerry Hall", "King Kenny": "Sebastian Croft", "Leigh-Anne Pinnock": "Jerry Hall",
+      "Maya Jama": "Jerry Hall", "Michael Sheen": "Jerry Hall", "Miranda Hart": "Jerry Hall",
+      "Romesh Ranganathan": "Jerry Hall", "Sebastian Croft": "Jerry Hall", "Sharon Rooney": "Leigh-Anne Pinnock"
     } }
   ]
 };
