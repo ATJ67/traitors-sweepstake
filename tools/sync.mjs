@@ -281,7 +281,7 @@ async function main() {
   }
 
   if (changes.length) {
-    writeData(D);
+    if (!DRY) writeData(D);
     const after = standings(T, D);
     const top = after.slice(0, 3).map(([n, p]) => `${n} ${p}`).join(", ");
     publish(`Sync: ${changes.join("; ")}\n\nAutomated by tools/sync.mjs. Leaders: ${top}.`);
