@@ -359,11 +359,36 @@ window.SWEEPSTAKE = {
       "absent": [],
       "banished": "Jerry Hall",
       "votingComplete": true
+    },
+    {
+      "ep": 8,
+      "type": "murder",
+      "victim": "Miranda Hart"
+    },
+    {
+      "ep": 8,
+      "type": "roundtable",
+      "votes": {
+        "James Acaster": "Joanne McNally",
+        "James Blunt": "Sharon Rooney",
+        "Joanne McNally": "Leigh-Anne Pinnock",
+        "King Kenny": "Sharon Rooney",
+        "Leigh-Anne Pinnock": "Joanne McNally",
+        "Maya Jama": "Sebastian Croft",
+        "Michael Sheen": "Sharon Rooney",
+        "Romesh Ranganathan": "Michael Sheen",
+        "Sebastian Croft": "Joanne McNally",
+        "Sharon Rooney": "Joanne McNally"
+      },
+      "revotes": [],
+      "absent": [],
+      "banished": null,
+      "votingComplete": false
     }
   ],
   "syncStatus": {
     "latestEpisodeComplete": 7,
     "source": "Joe's board",
-    "at": "2026-10-23T16:36:02.592Z"
+    "at": "2026-10-24T13:34:01.694Z"
   }
 };
