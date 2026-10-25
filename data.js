@@ -368,6 +368,7 @@ window.SWEEPSTAKE = {
     {
       "ep": 8,
       "type": "roundtable",
+      "tableId": "ep8-table-1",
       "votes": {
         "James Acaster": "Joanne McNally",
         "James Blunt": "Sharon Rooney",
@@ -383,12 +384,32 @@ window.SWEEPSTAKE = {
       "revotes": [],
       "absent": [],
       "banished": null,
-      "votingComplete": false
+      "votingComplete": false,
+      "ballotPowers": [
+        {
+          "kind": "double-vote",
+          "holder": "King Kenny"
+        }
+      ],
+      "extraBallots": [
+        {
+          "round": 0,
+          "voter": "King Kenny",
+          "target": "Sharon Rooney"
+        }
+      ],
+      "outcome": {
+        "status": "pending",
+        "tied": [
+          "Joanne McNally",
+          "Sharon Rooney"
+        ]
+      }
     }
   ],
   "syncStatus": {
     "latestEpisodeComplete": 7,
     "source": "Joe's board",
-    "at": "2026-10-24T13:34:01.694Z"
+    "at": "2026-10-25T12:59:31.947Z"
   }
 };
