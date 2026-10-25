@@ -86,6 +86,11 @@ function validate(T, D, events) {
         if (!present.includes(v)) errors.push(`${where}: voter ${v} not at the table`);
         if (!present.includes(t)) errors.push(`${where}: vote for ${t}, who isn't at the table`);
       }));
+      if (T.ballotView && (ev.ballotPowers !== undefined || ev.extraBallots !== undefined)) {
+        const bv = T.ballotView(ev, present);
+        bv.errors.forEach((e) => errors.push(`${where}: ${e}`));
+      }
+      if (ev.banished && ev.outcome && ev.outcome.status === "pending") errors.push(`${where}: banishment recorded but outcome still pending`);
       if (ev.banished) {
         known(ev.banished);
         if (!before.has(ev.banished)) errors.push(`${where}: ${ev.banished} not in the game`);
@@ -95,6 +100,8 @@ function validate(T, D, events) {
           const last = rounds[rounds.length - 1];
           const tally = {};
           Object.values(last).forEach((t) => (tally[t] = (tally[t] || 0) + 1));
+          // double / extra votes (e.g. the Dagger) count towards the tally too
+          (ev.extraBallots || []).filter((b) => b.round === rounds.length - 1).forEach((b) => (tally[b.target] = (tally[b.target] || 0) + 1));
           const top = Math.max(0, ...Object.values(tally));
           if ((tally[ev.banished] || 0) !== top) errors.push(`${where}: ${ev.banished} banished but didn't get the most votes`);
         }
@@ -111,7 +118,8 @@ function validate(T, D, events) {
 
 const clean = (e) => {
   const x = {};
-  for (const k of ["ep", "type", "victim", "shielded", "who", "accepted", "votes", "revotes", "absent", "banished", "votingComplete", "winners"]) {
+  for (const k of ["ep", "type", "victim", "shielded", "who", "accepted", "tableId", "votes", "revotes", "absent", "banished",
+                   "votingComplete", "ballotPowers", "extraBallots", "outcome", "winners"]) {
     if (e[k] !== undefined) x[k] = e[k];
   }
   return x;
