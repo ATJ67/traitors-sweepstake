@@ -233,12 +233,14 @@ async function main() {
 
   // 1. Joe's board
   let joeLatest = 0;
+  let joeMaxEp = 0;   // last episode Joe has any verified events for
   if (!PRETEND_BEHIND) try {
     const joe = await fetchJoe();
     const known = fs.existsSync(KNOWN_JOE_SCORING) ? fs.readFileSync(KNOWN_JOE_SCORING, "utf8").trim() : null;
     if (known && joe.hash !== known) warnings.push("Joe has changed his scoring rules — ask Claude to review before relying on them");
     joeLatest = joe.data.automation?.latestEpisodeFullyScored || 0;
     const joeEvents = joe.data.events.map(clean);
+    joeMaxEp = Math.max(0, ...joeEvents.map((e) => e.ep));
     log(`Joe: fully scored to ep ${joeLatest}; ours: ep ${D.syncStatus.latestEpisodeComplete}; aired: ep ${aired}`);
     if (joeLatest >= D.syncStatus.latestEpisodeComplete && !sameEvents(joeEvents, D.events)) {
       const errors = validate(T, D, joeEvents);
@@ -255,13 +257,16 @@ async function main() {
     warnings.push("Couldn't read Joe's board: " + e.message);
   }
 
-  // 2. The web, for anything still missing
-  if (D.syncStatus.latestEpisodeComplete < aired && !NO_WEB) {
-    const from = D.syncStatus.latestEpisodeComplete + 1;
+  // 2. The web, only for episodes Joe has nothing on yet. If Joe has a
+  //    partial episode (e.g. a tie still to be resolved), his verified data
+  //    wins and we wait for him rather than overwrite it with thinner web data.
+  const webFrom = Math.max(D.syncStatus.latestEpisodeComplete, joeMaxEp) + 1;
+  if (webFrom <= aired && !NO_WEB) {
+    const from = webFrom;
     try {
       const res = researchOnWeb(T, D, from, aired);
-      // keep our events up to the last complete episode, then add the web's
-      const kept = D.events.filter((e) => e.ep <= D.syncStatus.latestEpisodeComplete);
+      // keep everything before the episodes being researched, then add the web's
+      const kept = D.events.filter((e) => e.ep < from);
       const webEps = (res.episodes || []).filter((x) => x.ep >= from && x.ep <= aired).sort((a, b) => a.ep - b.ep);
       const webEvents = webEps.flatMap((x) => (x.events || []).map(clean));
       if (webEvents.length) {
@@ -270,7 +275,7 @@ async function main() {
         if (errors.length) warnings.push("Web results failed checks, not used: " + errors.slice(0, 3).join("; "));
         else if (!sameEvents(candidate, D.events)) {
           D.events = candidate;
-          let done = D.syncStatus.latestEpisodeComplete;
+          let done = Math.min(D.syncStatus.latestEpisodeComplete, from - 1);
           for (const x of webEps) {
             const rts = (x.events || []).filter((e) => e.type === "roundtable");
             if (x.complete && rts.every((e) => e.votingComplete) && x.ep === done + 1) done = x.ep; else break;
@@ -298,6 +303,8 @@ async function main() {
     log("no changes", JSON.stringify(before.slice(0, 3)));
   }
   warnings.forEach((w) => notify("Traitors sweepstake — check needed", w));
+
+  if (webFrom > aired && D.syncStatus.latestEpisodeComplete < aired) log(`waiting on Joe to finish episode ${D.syncStatus.latestEpisodeComplete + 1} (he has partial data)`);
 
   // Only mark the day done once we've got everything that has aired, or
   // we've genuinely tried both sources (so a network blip retries later).
