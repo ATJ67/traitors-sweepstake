@@ -368,25 +368,48 @@ window.SWEEPSTAKE = {
     {
       "ep": 8,
       "type": "roundtable",
-      "votes": {},
-      "revotes": [
-        {}
-      ],
+      "tableId": "ep8-table-1",
+      "votes": {
+        "James Acaster": "Joanne McNally",
+        "James Blunt": "Sharon Rooney",
+        "Joanne McNally": "Leigh-Anne Pinnock",
+        "King Kenny": "Sharon Rooney",
+        "Leigh-Anne Pinnock": "Joanne McNally",
+        "Maya Jama": "Sebastian Croft",
+        "Michael Sheen": "Sharon Rooney",
+        "Romesh Ranganathan": "Michael Sheen",
+        "Sebastian Croft": "Joanne McNally",
+        "Sharon Rooney": "Joanne McNally"
+      },
+      "revotes": [],
       "absent": [],
       "banished": null,
-      "votingComplete": false
+      "votingComplete": false,
+      "ballotPowers": [
+        {
+          "kind": "double-vote",
+          "holder": "King Kenny"
+        }
+      ],
+      "extraBallots": [
+        {
+          "round": 0,
+          "voter": "King Kenny",
+          "target": "Sharon Rooney"
+        }
+      ],
+      "outcome": {
+        "status": "pending",
+        "tied": [
+          "Joanne McNally",
+          "Sharon Rooney"
+        ]
+      }
     }
   ],
   "syncStatus": {
     "latestEpisodeComplete": 7,
-    "source": "web research",
-    "at": "2026-10-26T16:01:43.400Z",
-    "sources": [
-      "https://en.wikipedia.org/wiki/The_Celebrity_Traitors_series_2",
-      "https://britbrief.co.uk/entertainment/television/celebrity-traitors-sharon-rooney-tipped-for-exit-after-cliffhanger.html",
-      "https://www.ladbible.com/entertainment/tv/celebrity-traitors-season-2-results-961386-20261001",
-      "https://bexitmeansbexit.substack.com/p/celebrity-traitors-review-season-cbd",
-      "https://hiddenremote.com/the-celebrity-traitors-uk-season-2-episode-8-results-recap-who-murdered-banished"
-    ]
+    "source": "Joe's board",
+    "at": "2026-10-26T16:02:20.485Z"
   }
 };
