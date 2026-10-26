@@ -368,48 +368,24 @@ window.SWEEPSTAKE = {
     {
       "ep": 8,
       "type": "roundtable",
-      "tableId": "ep8-table-1",
-      "votes": {
-        "James Acaster": "Joanne McNally",
-        "James Blunt": "Sharon Rooney",
-        "Joanne McNally": "Leigh-Anne Pinnock",
-        "King Kenny": "Sharon Rooney",
-        "Leigh-Anne Pinnock": "Joanne McNally",
-        "Maya Jama": "Sebastian Croft",
-        "Michael Sheen": "Sharon Rooney",
-        "Romesh Ranganathan": "Michael Sheen",
-        "Sebastian Croft": "Joanne McNally",
-        "Sharon Rooney": "Joanne McNally"
-      },
+      "votes": {},
       "revotes": [],
       "absent": [],
       "banished": null,
-      "votingComplete": false,
-      "ballotPowers": [
-        {
-          "kind": "double-vote",
-          "holder": "King Kenny"
-        }
-      ],
-      "extraBallots": [
-        {
-          "round": 0,
-          "voter": "King Kenny",
-          "target": "Sharon Rooney"
-        }
-      ],
-      "outcome": {
-        "status": "pending",
-        "tied": [
-          "Joanne McNally",
-          "Sharon Rooney"
-        ]
-      }
+      "votingComplete": false
     }
   ],
   "syncStatus": {
     "latestEpisodeComplete": 7,
-    "source": "Joe's board",
-    "at": "2026-10-25T12:59:31.947Z"
+    "source": "web research",
+    "at": "2026-10-26T15:21:37.865Z",
+    "sources": [
+      "https://en.wikipedia.org/wiki/The_Celebrity_Traitors_series_2",
+      "https://www.ladbible.com/entertainment/tv/celebrity-traitors-season-2-results-961386-20261001",
+      "https://hiddenremote.com/the-celebrity-traitors-uk-season-2-episode-8-results-recap-who-murdered-banished",
+      "https://britbrief.co.uk/entertainment/television/celebrity-traitors-sharon-rooney-tipped-for-exit-after-cliffhanger.html",
+      "https://bexitmeansbexit.substack.com/p/celebrity-traitors-review-season-cbd",
+      "https://www.shango.media/bbc-celebrity-traitors-left-on-a-knife-edge-after-a-trip-to-the-field-of-screams-11978852"
+    ]
   }
 };
