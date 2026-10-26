@@ -369,7 +369,9 @@ window.SWEEPSTAKE = {
       "ep": 8,
       "type": "roundtable",
       "votes": {},
-      "revotes": [],
+      "revotes": [
+        {}
+      ],
       "absent": [],
       "banished": null,
       "votingComplete": false
@@ -378,14 +380,13 @@ window.SWEEPSTAKE = {
   "syncStatus": {
     "latestEpisodeComplete": 7,
     "source": "web research",
-    "at": "2026-10-26T15:21:37.865Z",
+    "at": "2026-10-26T16:01:43.400Z",
     "sources": [
       "https://en.wikipedia.org/wiki/The_Celebrity_Traitors_series_2",
-      "https://www.ladbible.com/entertainment/tv/celebrity-traitors-season-2-results-961386-20261001",
-      "https://hiddenremote.com/the-celebrity-traitors-uk-season-2-episode-8-results-recap-who-murdered-banished",
       "https://britbrief.co.uk/entertainment/television/celebrity-traitors-sharon-rooney-tipped-for-exit-after-cliffhanger.html",
+      "https://www.ladbible.com/entertainment/tv/celebrity-traitors-season-2-results-961386-20261001",
       "https://bexitmeansbexit.substack.com/p/celebrity-traitors-review-season-cbd",
-      "https://www.shango.media/bbc-celebrity-traitors-left-on-a-knife-edge-after-a-trip-to-the-field-of-screams-11978852"
+      "https://hiddenremote.com/the-celebrity-traitors-uk-season-2-episode-8-results-recap-who-murdered-banished"
     ]
   }
 };
