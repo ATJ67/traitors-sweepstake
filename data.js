@@ -366,25 +366,36 @@ window.SWEEPSTAKE = {
       "victim": "Miranda Hart"
     },
     {
-      "ep": 8,
+      "ep": 9,
       "type": "roundtable",
       "tableId": "ep8-table-1",
       "votes": {
-        "James Acaster": "Joanne McNally",
         "James Blunt": "Sharon Rooney",
-        "Joanne McNally": "Leigh-Anne Pinnock",
         "King Kenny": "Sharon Rooney",
         "Leigh-Anne Pinnock": "Joanne McNally",
         "Maya Jama": "Sebastian Croft",
         "Michael Sheen": "Sharon Rooney",
         "Romesh Ranganathan": "Michael Sheen",
         "Sebastian Croft": "Joanne McNally",
-        "Sharon Rooney": "Joanne McNally"
+        "James Acaster": "Joanne McNally",
+        "Sharon Rooney": "Joanne McNally",
+        "Joanne McNally": "Leigh-Anne Pinnock"
       },
-      "revotes": [],
+      "revotes": [
+        {
+          "James Blunt": "Sharon Rooney",
+          "King Kenny": "Joanne McNally",
+          "Leigh-Anne Pinnock": "Sharon Rooney",
+          "Maya Jama": "Sharon Rooney",
+          "Michael Sheen": "Sharon Rooney",
+          "Romesh Ranganathan": "Joanne McNally",
+          "Sebastian Croft": "Joanne McNally",
+          "James Acaster": "Joanne McNally"
+        }
+      ],
       "absent": [],
-      "banished": null,
-      "votingComplete": false,
+      "banished": "Joanne McNally",
+      "votingComplete": true,
       "ballotPowers": [
         {
           "kind": "double-vote",
@@ -396,20 +407,137 @@ window.SWEEPSTAKE = {
           "round": 0,
           "voter": "King Kenny",
           "target": "Sharon Rooney"
+        },
+        {
+          "round": 1,
+          "voter": "King Kenny",
+          "target": "Joanne McNally"
         }
       ],
       "outcome": {
-        "status": "pending",
+        "status": "banished",
         "tied": [
           "Joanne McNally",
           "Sharon Rooney"
+        ],
+        "startedEpisode": 8
+      }
+    },
+    {
+      "ep": 9,
+      "type": "murder",
+      "victim": "Sharon Rooney"
+    },
+    {
+      "ep": 9,
+      "type": "roundtable",
+      "votes": {
+        "James Blunt": "James Acaster",
+        "King Kenny": "James Acaster",
+        "Leigh-Anne Pinnock": "James Acaster",
+        "Maya Jama": "James Acaster",
+        "Michael Sheen": "James Acaster",
+        "Romesh Ranganathan": "James Acaster",
+        "Sebastian Croft": "James Acaster"
+      },
+      "revotes": [],
+      "absent": [],
+      "banished": "James Acaster",
+      "votingComplete": false
+    },
+    {
+      "ep": 10,
+      "type": "murder",
+      "victim": "Michael Sheen"
+    },
+    {
+      "ep": 10,
+      "type": "roundtable",
+      "tableId": "ep10-table-1",
+      "votes": {
+        "Maya Jama": "Romesh Ranganathan",
+        "Leigh-Anne Pinnock": "Romesh Ranganathan",
+        "Sebastian Croft": "Maya Jama",
+        "Romesh Ranganathan": "Maya Jama",
+        "James Blunt": "Maya Jama",
+        "King Kenny": "Maya Jama"
+      },
+      "revotes": [],
+      "absent": [],
+      "banished": "Maya Jama",
+      "votingComplete": true
+    },
+    {
+      "ep": 10,
+      "type": "roundtable",
+      "tableId": "ep10-table-2",
+      "votes": {
+        "Leigh-Anne Pinnock": "Romesh Ranganathan",
+        "King Kenny": "Leigh-Anne Pinnock",
+        "Sebastian Croft": "Leigh-Anne Pinnock",
+        "Romesh Ranganathan": "Leigh-Anne Pinnock",
+        "James Blunt": "Leigh-Anne Pinnock"
+      },
+      "revotes": [],
+      "absent": [],
+      "banished": "Leigh-Anne Pinnock",
+      "votingComplete": true
+    },
+    {
+      "ep": 10,
+      "type": "roundtable",
+      "tableId": "ep10-table-3",
+      "votes": {
+        "Romesh Ranganathan": "James Blunt",
+        "James Blunt": "King Kenny",
+        "King Kenny": "James Blunt",
+        "Sebastian Croft": "King Kenny"
+      },
+      "revotes": [
+        {
+          "Sebastian Croft": "King Kenny",
+          "Romesh Ranganathan": "King Kenny"
+        }
+      ],
+      "absent": [],
+      "banished": "King Kenny",
+      "votingComplete": true,
+      "ballotPowers": [],
+      "extraBallots": [],
+      "outcome": {
+        "status": "banished",
+        "tied": [
+          "James Blunt",
+          "King Kenny"
         ]
       }
+    },
+    {
+      "ep": 10,
+      "type": "roundtable",
+      "tableId": "ep10-table-4",
+      "votes": {
+        "Romesh Ranganathan": "James Blunt",
+        "James Blunt": "Romesh Ranganathan",
+        "Sebastian Croft": "James Blunt"
+      },
+      "revotes": [],
+      "absent": [],
+      "banished": "James Blunt",
+      "votingComplete": true
+    },
+    {
+      "ep": 10,
+      "type": "final",
+      "winners": [
+        "Romesh Ranganathan",
+        "Sebastian Croft"
+      ]
     }
   ],
   "syncStatus": {
-    "latestEpisodeComplete": 7,
+    "latestEpisodeComplete": 10,
     "source": "Joe's board",
-    "at": "2026-10-26T16:02:20.485Z"
+    "at": "2026-10-31T02:27:14.194Z"
   }
 };
