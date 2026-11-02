@@ -432,18 +432,19 @@ window.SWEEPSTAKE = {
       "ep": 9,
       "type": "roundtable",
       "votes": {
+        "Romesh Ranganathan": "James Acaster",
+        "Sebastian Croft": "James Acaster",
         "James Blunt": "James Acaster",
         "King Kenny": "James Acaster",
         "Leigh-Anne Pinnock": "James Acaster",
         "Maya Jama": "James Acaster",
         "Michael Sheen": "James Acaster",
-        "Romesh Ranganathan": "James Acaster",
-        "Sebastian Croft": "James Acaster"
+        "James Acaster": "Michael Sheen"
       },
       "revotes": [],
       "absent": [],
       "banished": "James Acaster",
-      "votingComplete": false
+      "votingComplete": true
     },
     {
       "ep": 10,
@@ -538,6 +539,6 @@ window.SWEEPSTAKE = {
   "syncStatus": {
     "latestEpisodeComplete": 10,
     "source": "Joe's board",
-    "at": "2026-10-31T02:27:14.194Z"
+    "at": "2026-11-02T09:44:09.380Z"
   }
 };
